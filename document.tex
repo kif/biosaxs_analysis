@@ -128,7 +128,7 @@ open to contributions.
 Despite Python being an interpreted language, FreeSAS is performance oriented and most of the processing is performed in Cython\cite{cython} extensions written in C 
 to obtain the seeked performances. 
 All the code has been made available and packaged independently from the online analysis tools to offer ESRF users and other scientists
-the ability to reprocess their data and compare the processing between software and institutes.
+the ability to reprocess their data and compare the processing between software and sources.
 
 \subsubsection{SAS plotting}
 
@@ -153,28 +153,57 @@ inverse Fourier tranform (IFT due to the loss of phase information and the limit
 This ill-posed mathematical has not exact solution and is usually inversed with some extra constraints imposed, like the finite size of the support (defined by the maximum diameter, $Dmax$).    
 FreeSAS proposes an IFT based on the Bayesian statistics and derived from BIFT\cite{bift}, like the one found in \cite{BioXTAS-RAW}.
 The command-line programme to perfrom and IFT is \textit{bift.py}. 
-Despite our approaches differ, the results of bift.py is similar to the DATGNOM\cite{ATSAS1} from ATSAS which uses a Tikhonov's regularization.
+Despite the approach differs, the results of \textit{bift.py} is similar to the DATGNOM\cite{ATSAS1} from ATSAS which uses a Tikhonov's regularization.
+The diameter found, $Dmax$, is directly comparable with the one provided by ATSAS, but the parameter $\alpha$ differs since the theory used for the regularisation differs. 
 
 \subsubsection{Equivalence of scattering curves}
+To obtains the best possible signal from the sample, the capillary is exposed multiple times with a short exposure time.
+All equivalent frames are then merged to optimized the signal/noise ratio without polluting the signal with radiation damage.  
+The equivalence of frames is obtained from the \textit{CorMap} \cite{cormap} implementated from the publication. 
 
 \subsubsection{Overlay of bead models}
+FreeSAS features also \textit{subpycomp} \cite{BM29ODA}, a tool to rotate/flip bead models and overlay them prior to merge them. It is equivalent to the SUPCOMB\cite{supcomb} tool from ATSAS. 
 
+\subsection{The workflow manager: \textit{dahu}}
 
-\subsection{The workflow manager, \textit{Dahu}}
+The role of the workflow manager is to ensure all the processing requested by the user interface is actually performed and that the client is warned in case of issue.
+This subsection is purely technical and can be skipped. 
+
+EDNA\cite{EDNA} was used as workflow manager for the previous data-analysis pipeline for many protein crystallography beamlines and the BioSAXS beamline at the ESRF \cite{BM29ODA}.
+The parallelization model implemented in EDNA is based on Python threads and forking processes. 
+Despite the Global Interpreter Lock (GIL) which prevents Python from running multiple threads simultaneously, parallel processing occues when the work is performed
+in separated process. 
+This implies that for each task to be perfomed, an input file needs to be written before launching the process and the result file needs to be read and parsed after the end of the processing.
+When processing was doing loops of jobs, most of the time was spent in string manipulation for writing and parsing strings (for example: to compare pair-wise 10 frames it takes 45 process to be launched !)
+ 
+The \textit{dahu} workflow manager was designed for the TruSAXS beamline \cite{ID02} with those limitation in mind. 
+Text manipulation was simplfied by switching from XML to JSON data-structure representation. 
+This modification alone has proven to speed up EDNA by a factor 3 !
+
+Most of the idea implemented in the EDNA framework were keps and the code was simplified to the extreme since \textit{dahu} represents only 1000 lines of code. 
+The scheduling of jobs is performed via a shared queue (hence First-in-First-out) and only a limited number of them are allowed to run simultaneously, via theads.
+The parallelization can only occure only in sections of code which release the GIL, this is why FreeSAS is mostly implemented in Cython (and GIL-free).      
+
+\subsubsection{Jobs}
+
+The \textit{dahu-job} is the interface with the outer world. 
+It manages the execution identifier, exposes the status and controls the execution workflow of the underlying plugin via the \textit{setup-process-teardown} sequence.
+Unlike EDNA, in \textit{dahu}, only jobs see their input and output saved to the disk to allow off-line reprocessing.   
+
+\subsubsections{Plugins}
+Plugins are Python \textit{function} or \textit{classes} which are provided externally (by the beamlinee scientist) and implement the actual processing.
+The plugins are fairly independent of the \textit{dahu} framework and hence rather easy to implement in pure Python.
+For example the three plugins described in section \ref{pipeline} account each for about 700 lines of code.  
 
 \subsubsection{Online processing}
+Online processing is achieved by exposing \textit{dahu-jobs} via a Tango interface.
 
 \subsubsection{Offline processing}
-Dahu provides a command-line tool, called \textit{dahu-reprocess} designed to 
-(re-)execute one or several pipelines. 
-This tool is also used during    
+Dahu provides also a command-line tool, called \textit{dahu-reprocess} designed to (re-)execute one or several pipelines based on the job-description saved. 
+This tool is also used for testing pipelines offline.
+Dahu has virtually no dependencies (beside Python) and can deployed on any computer to reprocess complete datasets. 
 
-
-
-Text text text text text text text text text text text text text text
-text text text text text text text.
-
-\section{Data analysis piplines}
+\section{Data analysis pipelines}
 \subsection{Integration pipeline}
 \subsection{Sample-changer pipeline}
 \subsection{SEC-SAXS pipeline}
