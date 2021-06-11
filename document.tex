@@ -41,8 +41,15 @@
 \cauthor[a]{Forename}{Surname}{email}{address if different from \aff}
 \author[b]{Forename}{Surname}
 
-\aff[a]{First affiliation address \country{England}}
+\aff[a]{First affiliation address \country{France}}
 \aff[b]{Second affiliation address}
+
+Jerome
+Martha
+Guillaume
+Alex
+Mark
+Petra
 
      % Use \shortauthor to indicate an abbreviated author list for use in
      % running heads (you will need to uncomment it).
@@ -71,7 +78,7 @@
 \maketitle                        % DO NOT DELETE THIS LINE
 
 \begin{synopsis}
-Supply a synopsis of the paper for inclusion in the Table of Contents.
+Detailed presentation of the automatic data analysis pipeline for the BioSAXS beam-line at the European synchrotron.  
 \end{synopsis}
 
 \begin{abstract}
@@ -85,21 +92,68 @@ Abstract goes here.
      % Now enter the text of the document in multiple \section's, \subsection's
      % and \subsubsection's as required.
 
-\section{Section title}
+\section{Introduction}
+Small angle scattering (SAS) provides low resolution information on macromolecules and it is  
+particularly suited for biological sample thanks to the absence of lengthy preparation. 
+Biologists expects from SAXS experiment to retrieve the size and the shape of their protein or complex under study.
+Automated analysis is hence of crucial importance for them.
+
+The BioSAXS\cite{BM29paper} beamline had an automated pipeline for the data-analysis which was based on EDNA\cite{EDNA} and the ATSAS\cite{ATSAS}
+software. 
+While the outcome of the processing was very appreciated by our users, the system was already close to the maximal throughput possible in terms of performances. 
+With the increase of brilliance expected from the EBS\cite{EBS} and the refurbishment of the complete beamline which took place during the associated shutdown, 
+a complete rewrite of all the analysis code was considered.
+
+This contribution is divided in two main parts, starting with presentation of the tools used for 
+processing SAS data (\textit{FreeSAS}) and for assembling pipelines (\textit{Dahu}).
+Then the different pipelines are presented, the common for the reduction of the scattering images and two dedicated for sample-changer and SEC-SAXS experiments.      
+
+\section{Tools}
+
+To reach the 10-fold speed up expected from the new EBS source and the new detector (Upgrade from a Pilatus 1M to a 2M with a thick sensor, mounted \textit{in vacuum})
+all software used at the beamline was upgraded.
+Precise benchmarking of the execution times of the previous EDNA-based pipeline demonstated that 
+most time was spent in launching external tools coming from the ATSAS suite and in parsing text files produced by those tools.
+It was descided to rewrite all pipeline in plain Python \cite{Python} and call SAS-related tasks from a library, \textit{FreeSAS}. 
+Finally the interface to the control software, Bliss \cite{bliss}, would go via Tango \cite{tango} and use a simple FIFO task scheduler,  \textit{dahu}, 
+already used in production on another SAXS beamline at the ESRF: ID02\cite{ID02}.   
+
+\subsection{The SAS processing tools, \textit{FreeSAS}}
+
+\textit{FreeSAS} is a Python\cite{python} library containing SAS analysis tools available both via command like interface and from the Python API. 
+It does not claim to be as complete as the ATSAS counterpart,
+but is free, released under the MIT license (i.e. it can be included in commercial products), all source code is available publicly on github \cite{freesas} and
+open to contributions.
+Despite Python being an interpreted language, FreeSAS is performance oriented and most of the processing is performed in Cython\cite{cython} extensions written in C 
+to obtain the seeked performances. 
+All the code has been made available and packaged independently from the online analysis tools to offer ESRF users and other scientists
+the ability to reprocess their data and compare the processing between software and institutes.
+
+\subsubsection{SAS plotting}
+\subsubsection{Guinier region fitting}
+\subsubsection{Pair distribution function}
+\subsubsection{Equivalence of scattering curves}
+\subsubsection{Overlay of bead models}
+
+
+\subsection{The workflow manager, \textit{Dahu}}
+
+\subsubsection{Online processing}
+
+\subsubsection{Offline processing}
+Dahu provides a command-line tool, called \textit{dahu-reprocess} designed to 
+(re-)execute one or several pipelines. 
+This tool is also used during    
+
+
 
 Text text text text text text text text text text text text text text
 text text text text text text text.
 
-\subsection{Title}
-
-Text text text text text text text text text text text text text text
-text text text text text text text.
-
-\subsubsection{Title}
-
-Text text text text text text text text text text text text text text
-text text text text text text text.
-
+\section{Data analysis piplines}
+\subsection{Integration pipeline}
+\subsection{Sample-changer pipeline}
+\subsection{SEC-SAXS pipeline}
 
      % Appendices appear after the main body of the text. They are prefixed by
      % a single \appendix declaration, and are then structured just like the
