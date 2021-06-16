@@ -99,8 +99,8 @@ Automated analysis is hence of crucial importance for them.
 The BioSAXS\cite{BM29paper} beamline had an automated pipeline for the data-analysis which was based on EDNA\cite{EDNA} and the ATSAS\cite{ATSAS}
 software. 
 While the outcome of the processing was very appreciated by our users, the system was already close to the maximal throughput possible in terms of performances. 
-With the increase of brilliance expected from the EBS\cite{EBS} and the refurbishment of the complete beamline which took place during the associated shutdown, 
-a complete rewrite of all the analysis code was considered.
+The new EBS source \cite{EBS} of the ESRF not only provides a higher brilliance, but also new wiggler sources for former bending-magnet beamlines which triggered the re-build and the upgrade of most of them. 
+Thus the BioSAXS beamline has been rebuilt and features a new flight-tube with its Pilatus 2M detector mounted in vaccum. 
 
 This contribution is divided in two main parts, starting with presentation of the tools used for 
 processing SAS data (\textit{FreeSAS}) and for assembling pipelines (\textit{Dahu}).
@@ -199,10 +199,49 @@ Online processing is achieved by exposing \textit{dahu-jobs} via a Tango interfa
 Dahu provides also a command-line tool, called \textit{dahu-reprocess} designed to (re-)execute one or several pipelines based on the job-description saved. 
 This tool is also used for testing pipelines offline.
 Dahu has virtually no dependencies (beside Python) and can deployed on any computer to reprocess complete datasets. 
+To reprocess data acquired at the BioSAXS beamline from ESRF, one would of course need FreeSAS and other dependencies, but all of them are publicly available and open source.
 
 \section{Data analysis pipelines}
+
+There are two main experiments performed at the BioSAXS beamline, either using the sample changer or the inline-chromatography setup.
+Two analysis pipelines were built, one for each of those experimental setups, and a third one which contains the common part, mainly related to
+the azimuthal integration of individual frames.
+
+Like all new detectors of the ESRF, the Pilatus 2M detector is controled by the LIMA \cite{lima} software which saves images in a HDF5 file-format \cite{hdf5} with several frames per file (typically 100 frames per file)
+This permits compression, faster data-access, symbolic links to datasets from one file to another ... but it is dramatically different from the former pipeline which was triggered frame per frame.
+
+The versalitity of the HDF5 format allows to have only one output file for each of the processing pipeline, making backups easier as well. 
+Each pipeline registers the result of every processing step of the pipeline in the HDF5 file together with the associated configuration.
+Input datasets are also referenced using external links to the raw data to avoid data duplication. 
+Finally metadata describing the sample, its buffer and the configuration of the beamline are also registered using the Nexus convention \cite{nexus}.
+Finally, every single HDF5 file produced by the processing features a default plot which tries to best summarize the experimental result to the user.
+ESRF provides tools like `silx view` to visualize those files and explore them.
+
 \subsection{Integration pipeline}
+
+Azimuthal integration is a common reduction step for all small angle scattering experiment, and the BioSAXS beamline uses
+pyFAI \cite{pyFAI2020} as core of its multiframe integration pipeline implemented in dahu.
+Thanks to the GPU-computing, pyFAI is able to integrate each frame within a milisecond.
+
+In sample changer mode, all frames are expected to be similar and needs to be merged but those exhibitting radiation damage should be discarded.
+Every single scattering curve is compared with all others within a file to build the correlation-map \cite{cormap}. 
+This allows to determine a group of frames which are equivalent based on two threshold, the minimum probablity for two adjacent frames 
+and for frames which are not adjacent. 
+
+Frames found equivalent in the CorMap analysis are averaged taking into account normalization from the beam-stop diode value (in 2D).
+The uncertainties for pixel values is propagated assuming Poisson statistics. 
+The standard deviation of each pixel in the stack of equivalent frames was found noticably lower than the propagated variance, assuming a Poisson statistic.
+The averaged frame (with its associated uncertainties) is finally azimuthaly integrated with pyFAI ans stored. 
+The SAXS plot I = f(q) is set as the default representation for this processing.
+
+In chromatography mode, the aquisition occures typically over half an hour representing thousand images at 1Hz aquisition rate. 
+This results in several HDF5 files containing partial chromatogram.
+The total scattering is computed by summing all intensities in each of the curve to build a simple chromatogram which indicates weather a sample elluded 
+from the chromatography colum or not.
+
 \subsection{Sample-changer pipeline}
+
+
 \subsection{SEC-SAXS pipeline}
 
      % Appendices appear after the main body of the text. They are prefixed by
