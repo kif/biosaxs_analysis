@@ -39,11 +39,11 @@
      % affiliations; if there is only one affiliation address, remove the [a].
 
 \cauthor[a]{Jérôme}{Kieffer}{jerome.kieffer@esrf.fr}
-\author[a]{Martha E.}{Brennich}{gmail or Bruker ?}
+\author[a]{Martha E.}{Brennich}
 \author[b]{Jean-Baptiste}{Florial}
-\cauthor[a]{Alejandro}{De Maria Antolinos}
-\cauthor[a]{Mark}{Tully}
-\cauthor[a]{Petra}{Pernot}
+\author[a]{Alejandro}{De Maria Antolinos}
+\author[a]{Mark}{Tully}
+\author[a]{Petra}{Pernot}
 \aff[a]{The European Synchrotron, 71 Avenue des Martyrs, 38000 Grenoble \country{France}}
 \aff[b]{European Molecular Biology Laboratory, 71 Avenue des Martyrs, 38000 Grenoble \country{France}}
 
@@ -204,49 +204,96 @@ To reprocess data acquired at the BioSAXS beamline from ESRF, one would of cours
 \section{Data analysis pipelines}
 
 There are two main experiments performed at the BioSAXS beamline, either using the sample changer or the inline-chromatography setup.
-Two analysis pipelines were built, one for each of those experimental setups, and a third one which contains the common part, mainly related to
-the azimuthal integration of individual frames.
+Thus, two analysis pipelines were built, one for each of those experimental setups, and a third pipeline acts as a pre-processor and contains the common part, 
+mainly related to the azimuthal integration of individual frames.
 
-Like all new detectors of the ESRF, the Pilatus 2M detector is controled by the LIMA \cite{lima} software which saves images in a HDF5 file-format \cite{hdf5} with several frames per file (typically 100 frames per file)
+Like all new detectors acquired at the ESRF during the upgrade, the Pilatus 2M detector used at the BioSAXS beamline is controled by the LIMA \cite{lima} 
+software which saves images in a HDF5 file-format \cite{hdf5} with several frames per file
+
+ (typically 100 frames per file)
 This permits compression, faster data-access, symbolic links to datasets from one file to another ... but it is dramatically different from the former pipeline which was triggered frame per frame.
 
 The versalitity of the HDF5 format allows to have only one output file for each of the processing pipeline, making backups easier as well. 
 Each pipeline registers the result of every processing step of the pipeline in the HDF5 file together with the associated configuration.
 Input datasets are also referenced using external links to the raw data to avoid data duplication. 
 Finally metadata describing the sample, its buffer and the configuration of the beamline are also registered using the Nexus convention \cite{nexus}.
-Finally, every single HDF5 file produced by the processing features a default plot which tries to best summarize the experimental result to the user.
-ESRF provides tools like `silx view` to visualize those files and explore them.
+Each processing pipeline produces a single HDF5 file as output, which defines a *default* plot which tries to best summarize the experimental result to the user.
+ESRF provides tools like `silx view` \cite{silx}  and the web-viewer h5web \cite{silx} to visualize those files and explore them.
 
-\subsection{Integration pipeline}
+Visualization via memcached.
+
+\subsection{Multi-frame Integration pipeline}
 
 Azimuthal integration is a common reduction step for all small angle scattering experiment, and the BioSAXS beamline uses
-pyFAI \cite{pyFAI2020} as core of its multiframe integration pipeline implemented in dahu.
+pyFAI \cite{pyfai_2020} as core of its multiframe integration pipeline implemented in dahu.
 Thanks to the GPU-computing, pyFAI is able to integrate each frame within a milisecond.
+In order to avoid cross-correlation between neighboring bins, pixel splitting has been disabled.
+Frames are read from the HDF5 file produced by Lima \cite{lima} and all other metadata like the sample desciption and the beam-stop diode instensities
+are sent as part of the job description from BSXcube.  
 
 In sample changer mode, all frames are expected to be similar and needs to be merged but those exhibitting radiation damage should be discarded.
 Every single scattering curve is compared with all others within a file to build the correlation-map \cite{cormap}. 
 This allows to determine a group of frames which are equivalent based on two threshold, the minimum probablity for two adjacent frames 
 and for frames which are not adjacent. 
 
-Frames found equivalent in the CorMap analysis are averaged taking into account normalization from the beam-stop diode value (in 2D).
+Frames found equivalent in the CorMap analysis are averaged taking into account normalization from the beam-stop diode value. 
 The uncertainties for pixel values is propagated assuming Poisson statistics. 
-The standard deviation of each pixel in the stack of equivalent frames was found noticably lower than the propagated variance, assuming a Poisson statistic.
-The averaged frame (with its associated uncertainties) is finally azimuthaly integrated with pyFAI ans stored. 
-The SAXS plot I = f(q) is set as the default representation for this processing.
+%The standard deviation of each pixel in the stack of equivalent frames was found noticably lower than the propagated variance, assuming a Poisson statistic.
+The averaged frame (with its associated uncertainties) is finally azimuthaly integrated with pyFAI and stored in the output file . 
+The SAXS plot $I = f(q)$ is set as the default representation of this output file so that .
 
 In chromatography mode, the aquisition occures typically over half an hour representing thousand images at 1Hz aquisition rate. 
-This results in several HDF5 files containing partial chromatogram.
-The total scattering is computed by summing all intensities in each of the curve to build a simple chromatogram which indicates weather a sample elluded 
-from the chromatography colum or not.
+This results in several HDF5-files containing partial chromatograms.
+The total scattering is computed by summing all intensities in each of the curve to build a simple chromatogram $I_{sum} = f(t)$ 
+which indicates weather a sample elluted from the chromatography column or not. 
+This (partial) chromatogram is the default plot for this integrated file.  
 
 \subsection{Sample-changer pipeline}
+In sample changer mode, solution containing samples are acquired interleaved with pure buffer solutions.
+The processing is triggered with the sample filename, i.e. the name of the file contraining the sample data after azimuthal integration and a list of 
+buffer files corresponding to the acquisition of buffers (usually the buffer before and the buffer after the sample acquisition). 
 
+Integrated buffer data are compared with the CorMap algorithm in order to validate acquired buffer matches, 
+If they don't, the largest concomittent region is selected. 
+Averaging of the buffer signal and subtraction of the buffer from sample data are both performed on the 
+2D frames. 
+Working on the 2D data frames allows a better preservation of weak signals and cancel-out systematic deviation
+from certain pixels.
+The subtracted frame is then integrated using pyFAI and the associated uncertainties propagated according to \cite{pyfai-2020}.
+
+The subtracted SAXS curve is then analyzed with Guinier fit (all three algorithms available in FreeSAS are tested)
+to provide the hydrodynamic radius of gyration, $R_g$ and the forwards scattering intensity $I_0$, 
+Kratky plot to provide some assessement on the compacity or if the sample is unfolded. 
+Finally, the inverse Fourier is obtained from BIFT and provides the diameter $D_{max}$, the pair-distribution 
+and confirms the radius of gyration.
+After the analysis, the volume is calculated from the Porod formula, and the Rambo-Tainer invariants provide 
+informations about the molecular weight of the sample.
+All those information are registered and the default plot is defined to have a display similar to fig\ldots
+with the scattering curve superimposed with the Guiner region and the Fourier transform of the BIFT curve.
+
+All those results and plots are finally registered in the ISPyBB database and instantly made available to the user via
+the BioSAXS data portal (https://exi2.esrf.fr). 
+The same data are also shared with the control software via a memcached key-value database.  
+       
 
 \subsection{SEC-SAXS pipeline}
+Online purification of the sample to reduce the effect of oligomerization has become a de-facto procedure
+since it was introduced in 2012 \cite{SECPaper2012} and accounts now for half of the experiments performed at the beamline.
 
-     % Appendices appear after the main body of the text. They are prefixed by
-     % a single \appendix declaration, and are then structured just like the
-     % body text.
+The input for this pipeline a list of partial chromatograms integrated by the mutli-frame pipeline presented in section {}
+The first step is to re-build the complete chromatogram, taking into account the possibility for empty section (due to missing input files).
+
+To be able to extract components, multivariate analysis is perfromed to provide a hint on how many components 
+SVD and NMF factorizations are performed 
+ 
+
+
+
+
+\section{Conclusion}
+
+
+
 
 \appendix
 \section{Appendix title}
