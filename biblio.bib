@@ -453,13 +453,6 @@ month = {May},
 note = {session M010.3}
 }
 
-@misc{freesas,
-  author =   {Bonamis, G. and Kieffer, J},
-  title =     {{FreeSAS}: Open source small angle scattering tools for {Python}},
-  year =        {2015},
-  url = "https://github.com/kif/freesas"
-}
-
 @misc{dahu,
   author =   {Kieffer, J},
   title =     {{dahu}: data analysis RPC server over {Tango}},
@@ -668,7 +661,7 @@ abstract = {With the rise in popularity of biological small-angle X-ray scatteri
 keywords = {biological small-angle X-ray scattering, robotics, microfluidics},
 }
 
-@article{BioXTASraw,
+@article{bioxtasraw,
 author = "Nielsen, S. S. and Toft, K. Noergaard and Snakenborg, D. and Jeppesen, M. G. and Jacobsen, J. K. and Vestergaard, B. and Kutter, J. P. and Arleth, L.",
 title = "{{\it BioXTAS RAW}, a software program for high-throughput automated small-angle X-ray scattering data reduction and preliminary analysis}",
 journal = "Journal of Applied Crystallography",
@@ -997,12 +990,8 @@ number = {1},
 pages = {030034},
 year = {2016},
 doi = {10.1063/1.4952857},
-URL = { 
-        https://aip.scitation.org/doi/abs/10.1063/1.4952857    
-},
-eprint = { 
-        https://aip.scitation.org/doi/pdf/10.1063/1.4952857
-    
+URL = {         https://aip.scitation.org/doi/abs/10.1063/1.4952857    },
+eprint = {        https://aip.scitation.org/doi/pdf/10.1063/1.4952857}
 }
 
 @article{ID02_2018,
@@ -1083,8 +1072,6 @@ keywords = {online data analysis, solution scattering, proteins},
 }
 @InProceedings{bliss,
   author       = {M. Guijarro and G. Berruyer and A. Beteva and L. Claustre and T.M. Coutinho and M.C. Dominguez and P. Guillou and C. Guilloud and A. Homs and J.M. Meyer and V. Michel and P. Pancino and E. Papillon and M. Perez and S. Petitdemange and L. Pithan and F. Sever and V. Valls},
-% author       = {M. Guijarro and G. Berruyer and A. Beteva and L. Claustre and T.M. Coutinho and M.C. Dominguez and others},
-% author       = {M. Guijarro and others},
   title        = {{Beamline Experiments at ESRF with BLISS}},
   booktitle    = {Proc. ICALEPCS'19},
   pages        = {70--77},
@@ -1179,4 +1166,117 @@ doi = {10.1107/S1600577520000776},
 url = {https://doi.org/10.1107/S1600577520000776},
 abstract = {New calibration tools in the {\it pyFAI} suite for processing scattering experiments acquired with area detectors are presented. These include a new graphical user interface for calibrating the detector position in a scattering experiment performed with a fixed large area detector, as well as a library to be used in {\it Jupyter notebooks} for calibrating the motion of a detector on a goniometer arm (or any other moving table) to perform diffraction experiments.},
 keywords = {powder diffraction, geometry calibration, goniometers, moving detectors, translation tables, pair distribution function},
+}
+@ARTICLE{svd_threshold,
+  author={Gavish, Matan and Donoho, David L.},
+  journal={IEEE Transactions on Information Theory}, 
+  title={The Optimal Hard Threshold for Singular Values is  $4/\sqrt {3}$ }, 
+  year={2014},
+  volume={60},
+  number={8},
+  pages={5040-5053},
+  doi={10.1109/TIT.2014.2323359}}
+
+@article{sklearn,
+author = {Varoquaux, G. and Buitinck, L. and Louppe, G. and Grisel, O. and Pedregosa, F. and Mueller, A.},
+title = {Scikit-Learn: Machine Learning Without Learning the Machinery},
+year = {2015},
+issue_date = {January 2015},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+volume = {19},
+number = {1},
+issn = {2375-0529},
+url = {https://doi.org/10.1145/2786984.2786995},
+doi = {10.1145/2786984.2786995},
+abstract = {Machine learning is a pervasive development at the intersection of statistics and computer science. While it can benefit many data-related applications, the technical nature of the research literature and the corresponding algorithms slows down its adoption. Scikit-learn is an open-source software project that aims at making machine learning accessible to all, whether it be in academia or in industry. It benefits from the general-purpose Python language, which is both broadly adopted in the scientific world, and supported by a thriving ecosystem of contributors. Here we give a quick introduction to scikit-learn as well as to machine-learning basics.},
+journal = {GetMobile: Mobile Comp. and Comm.},
+month = jun,
+pages = {29–33},
+numpages = {5}
+}
+
+@book{guinier,
+author = {Guinier, André.},
+address = {New York},
+booktitle = {X-ray diffraction in crystals, imperfect crystals, and amorphous bodies},
+isbn = {0486680118},
+keywords = {X-ray crystallography},
+language = {eng},
+lccn = {94007410},
+publisher = {Dover},
+title = {X-ray diffraction in crystals, imperfect crystals, and amorphous bodies },
+year = {1994},
+}
+  
+@software{silx,
+  author       = {Thomas VINCENT and
+                  Valentin Valls and
+                  payno and
+                  Jerome Kieffer and
+                  V. Armando Solé and
+                  Pierre Paleo and
+                  dnaudet and
+                  woutdenolf and
+                  Pierre K and
+                  juliagarriga and
+                  Marius Retegan and
+                  Mauro Rovezzi and
+                  Hans Fangohr and
+                  Pepijn Kenter and
+                  UUSim and
+                  Vincent Favre-Nicolin and
+                  CaptainNemoz and
+                  picca and
+                  Thomas A Caswell and
+                  Joao P C Bertoldo and
+                  Aidan Campbell and
+                  Christopher J. 'CJ' Wright and
+                  Guillaume Communie and
+                  Jan Kotanski and
+                  Tiago Coutinho and
+                  N0B0dY and
+                  Sang-Woo Kim and
+                  schooft and
+                  Tomas Farago and
+                  linupi},
+  title        = {silx-kit/silx: 0.15.1: 2021/05/17},
+  month        = may,
+  year         = 2021,
+  publisher    = {Zenodo},
+  version      = {v0.15.1},
+  doi          = {10.5281/zenodo.4767157},
+  url          = {https://doi.org/10.5281/zenodo.4767157}
+}
+@software{freesas,
+  author       = {Jerome Kieffer and
+                  Guillaume Bonamis and
+                  Martha E. Brennich},
+  title        = {{FreeSAS}: Open source small angle scattering tools for {Python}},
+  month        = jan,
+  year         = 2021,
+  publisher    = {Zenodo},
+  version      = {v0.8.5},
+  doi          = {10.5281/zenodo.4463031},
+  url          = {https://doi.org/10.5281/zenodo.4463031}
+}
+@article{nexus,
+author = "K{\"{o}}nnecke, Mark and Akeroyd, Frederick A. and Bernstein, Herbert J. and Brewster, Aaron S. and Campbell, Stuart I. and Clausen, Bj{\"{o}}rn and Cottrell, Stephen and Hoffmann, Jens Uwe and Jemian, Pete R. and M{\"{a}}nnicke, David and Osborn, Raymond and Peterson, Peter F. and Richter, Tobias and Suzuki, Jiro and Watts, Benjamin and Wintersberger, Eugen and Wuttke, Joachim",
+title = "{The NeXus data format}",
+journal = "Journal of Applied Crystallography",
+year = "2015",
+volume = "48",
+number = "1",
+pages = "301--305",
+month = "Feb",
+doi = {10.1107/S1600576714027575},
+url = {https://doi.org/10.1107/S1600576714027575},
+abstract = {NeXus is an effort by an international group of scientists to define a common data exchange and archival format for neutron, X-ray and muon experiments. NeXus is built on top of the scientific data format HDF5 and adds domain-specific rules for organizing data within HDF5 files, in addition to a dictionary of well defined domain-specific field names. The NeXus data format has two purposes. First, it defines a format that can serve as a container for all relevant data associated with a beamline. This is a very important use case. Second, it defines standards in the form of application definitions for the exchange of data between applications. NeXus provides structures for raw experimental data as well as for processed data.},
+keywords = {NeXus data format, data exchange, data archiving, platform-independent, HDF5},
+}
+@ONLINE{hdf5,
+    author = {{The HDF Group}},
+    title = "{Hierarchical data format version 5}",
+    year = {2000-2021},
+    url = {http://www.hdfgroup.org/HDF5}
 }

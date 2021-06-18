@@ -39,7 +39,7 @@
      % affiliations; if there is only one affiliation address, remove the [a].
 
 \cauthor[a]{Jérôme}{Kieffer}{jerome.kieffer@esrf.fr}
-\author[a]{Martha E.}{Brennich}
+\author[a]{Martha}{Brennich}
 \author[b]{Jean-Baptiste}{Florial}
 \author[a]{Alejandro}{De Maria Antolinos}
 \author[a]{Mark}{Tully}
@@ -96,7 +96,7 @@ particularly suited for biological sample thanks to the absence of lengthy prepa
 Biologists expects from SAXS experiment to retrieve the size and the shape of their protein or complex under study.
 Automated analysis is hence of crucial importance for them.
 
-The BioSAXS\cite{BM29paper} beamline had an automated pipeline for the data-analysis which was based on EDNA\cite{EDNA} and the ATSAS\cite{ATSAS}
+The BioSAXS\cite{BM29paper} beamline had an automated pipeline for the data-analysis which was based on EDNA\cite{EDNA} and the ATSAS\cite{ATSAS2}
 software. 
 While the outcome of the processing was very appreciated by our users, the system was already close to the maximal throughput possible in terms of performances. 
 The new EBS source \cite{EBS} of the ESRF not only provides a higher brilliance, but also new wiggler sources for former bending-magnet beamlines which triggered the re-build and the upgrade of most of them. 
@@ -112,7 +112,7 @@ To reach the 10-fold speed up expected from the new EBS source and the new detec
 all software used at the beamline was upgraded.
 Precise benchmarking of the execution times of the previous EDNA-based pipeline demonstated that 
 most time was spent in launching external tools coming from the ATSAS suite and in parsing text files produced by those tools.
-It was descided to rewrite all pipeline in plain Python \cite{Python} and call SAS-related tasks from a library, \textit{FreeSAS}. 
+It was descided to rewrite all pipeline in plain Python \cite{python} and call SAS-related tasks from a library, \textit{FreeSAS}. 
 Finally the interface to the control software, Bliss \cite{bliss}, would go via Tango \cite{tango} and use a simple FIFO task scheduler,  \textit{dahu}, 
 already used in production on another SAXS beamline at the ESRF: ID02\cite{ID02}.   
 
@@ -137,7 +137,7 @@ $q = 4\pi sin(2\theta/2)$
 Guinier analysis \cite{guinier} is usually the first analysis performed in BioSAXS to determine the radius of gyration ($R_g$)of the macromolecule (and the forwards scattering value $I_0$.
 $R_g$ is obtained from the slope of a linear regression of $ln(I)$ as function of $q^2$ on the proper q-range where this curve is afine (the Guinier-range).
 The selection of the Guinier-range is far from being obvious since most of subsequent analysis depend on the proper assesement of this regions, 
-multiple implementation are provided: \textit{autorg.py} which derives from the BioXTAS-RAW\cite{BioXTAS}, \textit{auto_guinier.py} which differs from the BioXTAS-RAW
+multiple implementation are provided: \textit{autorg.py} which derives from the BioXTAS-RAW\cite{bioxtasraw}, \textit{auto_guinier.py} which differs from the BioXTAS-RAW
 one by searching for a consensus region rather than the best region. 
 \textit{auto_gpa.py} performs a Guinier-peak-analysis\cite{gpa}, which is a quick assessment of the $R_g$ and $I_0$ and sometimes less robust than the two other implementations. 
 
@@ -148,7 +148,7 @@ This highlights the importance of publishing the actual implementation of the al
 Despite the scattering curve ($I(q)$) is the Fourier transform of the pair distribution function $p(r)$, the later cannot directly be obtained from the
 inverse Fourier tranform (IFT due to the loss of phase information and the limited amount of information in the scattering curve. 
 This ill-posed mathematical has not exact solution and is usually inversed with some extra constraints imposed, like the finite size of the support (defined by the maximum diameter, $Dmax$).    
-FreeSAS proposes an IFT based on the Bayesian statistics and derived from BIFT\cite{bift}, like the one found in \cite{BioXTAS-RAW}.
+FreeSAS proposes an IFT based on the Bayesian statistics and derived from BIFT\cite{bift}, like the one found in \cite{bioxtasraw}.
 The command-line programme to perfrom and IFT is \textit{bift.py}. 
 Despite the approach differs, the results of \textit{bift.py} is similar to the DATGNOM\cite{ATSAS1} from ATSAS which uses a Tikhonov's regularization.
 The diameter found, $Dmax$, is directly comparable with the one provided by ATSAS, but the parameter $\alpha$ differs since the theory used for the regularisation differs. 
@@ -259,7 +259,7 @@ Averaging of the buffer signal and subtraction of the buffer from sample data ar
 2D frames. 
 Working on the 2D data frames allows a better preservation of weak signals and cancel-out systematic deviation
 from certain pixels.
-The subtracted frame is then integrated using pyFAI and the associated uncertainties propagated according to \cite{pyfai-2020}.
+The subtracted frame is then integrated using pyFAI and the associated uncertainties propagated according to \cite{pyfai_2020}.
 
 The subtracted SAXS curve is then analyzed with Guinier fit (all three algorithms available in FreeSAS are tested)
 to provide the hydrodynamic radius of gyration, $R_g$ and the forwards scattering intensity $I_0$, 
@@ -283,12 +283,48 @@ since it was introduced in 2012 \cite{SECPaper2012} and accounts now for half of
 The input for this pipeline a list of partial chromatograms integrated by the mutli-frame pipeline presented in section {}
 The first step is to re-build the complete chromatogram, taking into account the possibility for empty section (due to missing input files).
 
-To be able to extract components, multivariate analysis is perfromed to provide a hint on how many components 
-SVD and NMF factorizations are performed 
- 
+To be able to extract the signal of single scatterer, multivariate analysis is perfromed to provide a hint on how many components
+have been separated in the chromatogram. 
+First the singular value decomposition, SVD, is performed, provided by the NumPy package \cite{numpy}.
+This decomposes the chromatogram $I(q)$ as a serie of singular-values representing the chromatogram for every component stored in the
+associated singular-vector. 
+There are as many singular values/vectors pairs as time-steps acquired in the experiment but only the first ones account for actual signal.
+Subsequent ones account only for noise. 
+The number of saved singular saved is provided in \cite{svd_threshold}.
+The de-entangled chromatograms for each component is available in the output file and browsabe with our graphical application silx-view or our web-based HDF5 browser.
+The ellution of the sample is usually very visible in the chromatogram associated to the second and third singular values.
+The first singlar  
+Users are sometimes surprised by the extracted singular vectors which should represent the scattering of the pure sample 
+but contain some negative section: SVD does not enforce the positivity of the signal and is a pure mathematical transformation.
 
+Another factorisation of the data is performed with non-negative matrix factorisation (NMF) since it enforces the positivity
+of the scattering contribution. 
+The NMF factorisation is provided by the scikit-learn library \cite{sklearn}.
+Unlike SVD, the NMF factorisation is neither fast, nor unique and the number of component needs to be known in advance.
+The number of component is set by default to five, accounting for a two solvent mixture and three component to be separated.   
+As for the SVD, the first vector represents the scattering of the pure buffer and the subsequent ones 
+are representative for the different samples with the background subtracted (with the associated chromatograms).
+Unfortunately, the NMF does not propagate the uncertainties \ldots
 
+The scattering curve of the pure buffer is obtained from the first singular vector of the SVD, but without uncertainties.
+A \textit{Correlation Map} is built with all experimental scattering curves and ranked from the  most likely to be pure buffer
+to the least likely. 
+Since chromatograms are mostly aquiring buffer signal the top thirty percent (tuneable) are considered pure buffer.
+The list of curves merged for buffer is stored in the output file and exhibits gaps when the sample elutes, 
+providing additional hints on the sample elution time. .    
+Subsequently, all scattering curves are buffer subtracted (here performed in 1D \ldots should we do it in 2D?) and the
+peak-seaching is performed on the total scattering chromatogram, after median filtering for smoothing.
+This peak search is performed with the find_peaks_cwt function from the scipy library \cite{scipy} which provides a
+list of peaks which are subsequently analyzed.
 
+Each fraction should correspond to a unique component, thus all subtracted curves associated to this region are merged and analysed
+with a similar pipeline as with the sample-changer mode: Guinier analysis, Kratky-plot, various invariant extraction and 
+pair-distribution via BIFT. 
+The results are presented the same way as in the sample-changer mode, one per fraction.
+The criteria for the fraction selection being rather soft, it common that empty fractions get analyzed and thus, 
+that the analysis fails. 
+
+All analyzed data are sent to the ISPyB database.     
 
 \section{Conclusion}
 
