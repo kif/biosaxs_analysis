@@ -41,7 +41,7 @@
 \cauthor[a]{Jérôme}{Kieffer}{jerome.kieffer@esrf.fr}{}
 \author[a]{Martha}{Brennich}
 \author[b]{Jean-Baptiste}{Florial}
-\author[a]{Marcus}{Oscarson}
+\author[a]{Marcus}{Oscarsson}
 \author[a]{Alejandro}{De Maria Antolinos}
 \author[a]{Mark}{Tully}
 \author[a]{Petra}{Pernot}
@@ -103,7 +103,7 @@ Biologists expects from SAXS experiment the validation of the size and the shape
 Since beamline users are neither synchrotron, nor SAXS specialists, a fully automated analysis is of crucial importance for them. 
 Automated data analysis should provided them not only with the reduced and pre-analyzed data but also with all metadata and parameters needed to get their results published according guidelines \cite{guidelines_2017} or  reprocessed them using third party software. 
 
-The BioSAXS beamline from the European synchortron \cite{BM29paper} had an automated pipeline for the data-analysis which was based on EDNA \cite{EDNA} and was using the ATSAS \cite{ATSAS2} software underneath. 
+The BioSAXS beamline from the European synchortron \cite{BM29paper} had an automated pipeline for the data-analysis which was based on EDNA \cite{edna} and was using the ATSAS \cite{ATSAS2} software underneath. 
 While the outcome of the processing was very appreciated by beamline users, the system was already close to the maximal throughput possible in terms of performances. 
 The new EBS source \cite{EBS} of the ESRF not only provides a higher brilliance, but also new wiggler sources for the former bending-magnet beamlines which triggered the re-build and the upgrade of most of them. 
 The BioSAXS beamline BM29 at the ESRF has been rebuilt in 2019 and features a new flight-tube with an upgraded  Pilatus 2M detector (planned to be) mounted in vacuum. 
@@ -135,20 +135,18 @@ All the code has been made available and packaged independently from the online 
 \begin{figure}
 \label{plot}
 \begin{center}
-\includegraphics[width=12cm]{Figure_1.png}
+\includegraphics[width=12cm]{Figure_1}
 \caption{Default visualization of bioSAS data with automated analysis}
 \end{center}
 \end{figure}
 
 
-\subsubsection{Guinier region fitting}
-Guinier analysis \cite{guinier} is usually the first analysis performed on bioSAXS data to determine the hydrodynamic radius of gyration ($R_g$) of the macromolecule (and the forwards scattering value $I_0$).
-$R_g$ is obtained from the slope of a linear regression of $ln(I)$ as function of $q^2$ on the proper q-range (the Guinier-region) where this curve is linear.
-The selection of the Guinier-region is far from being obvious and since most of subsequent analysis depend on its  proper assessment, 
-multiple implementation are provided: \textit{autorg} which derives from the implementation in BioXTAS-RAW \cite{bioxtasraw}, \textit{auto-guinier} searches for a consensus region rather than the best Guinier-region. 
-Finally \textit{auto-gpa} performs a Guinier-peak-analysis \cite{gpa}, 
-which is a quick assessment of the $R_g$ and $I_0$, sometimes less robust than the two other implementations, but suitable when many datasets are to be analyzed like in chromatography mode.
-
+\subsubsection{Guinier-region fitting:}
+the first analysis performed on bioSAXS data is to determine the hydrodynamic radius of gyration ($R_g$) of the macromolecule and the forwards scattering value $I_0$.
+$R_g$ is obtained from the slope of a linear regression of $ln(I)$ as function of $q^2$ on the proper q-range (the Guinier-region) where this curve is linear at low $q$ ($q \cdot R_g<1.3$).
+The selection of the Guinier-region is far from being obvious and most of subsequent analysis depend on the $R_g$ value.
+Thus multiple implementation are provided: \textit{autorg}, which derives from the implementation in BioXTAS-RAW \cite{bioxtasraw}; \textit{auto-guinier}, which searches for a consensus region rather than the best possible Guinier-region; and finally \textit{auto-gpa},, which performs a Guinier-peak-analysis \cite{gpa}. 
+The later is a quick assessment of the $R_g$ and $I_0$, sometimes less robust than the two other implementations, but suitable when many datasets are to be analyzed like in chromatography mode.
 It is worth mentioning that none of the three algorithms are provided the exact same results as the original \textsc{autorg} \cite{ATSAS2} version from ATSAS. 
 This highlights the importance of publishing the actual implementation of the algorithms with the associated numerical parameters used in it.
   
@@ -169,75 +167,80 @@ The equivalence of frames is obtained from the \textit{CorMap} \cite{cormap} imp
 \subsubsection{Overlay of bead models}
 FreeSAS features also \textit{subpycomp} \cite{BM29ODA}, a tool to rotate/flip bead models and overlay them prior to merge them. It is equivalent to the SUPCOMB\cite{supcomb} tool from ATSAS. 
 
-\subsection{The workflow manager: \textit{dahu}}
+\subsubsection{Extraction to ASCII data:} With the increased frame-rate of the new beamline, the historical 3-column text file with $q$, $<I>$, $\sigma(I)$ became unpractical and has been superseded by the hierarchical-data format \cite{hdf5} which contains all analysed data derived from raw data.
+The \textit{extract-ascii} tool from FreeSAS is designed to regenerate those text files and offer a compatibility with third-party tools.
 
-The role of the workflow manager is to ensure all the processing requested by the user interface is actually performed and that the client is warned in case of issue.
-This subsection is purely technical and can be skipped. 
+\subsection{The job-manager: \textit{dahu}}
 
-EDNA\cite{EDNA} was used as workflow manager for the previous data-analysis pipeline for many protein crystallography beamlines and the BioSAXS beamline at the ESRF \cite{BM29ODA}.
-The parallelization model implemented in EDNA is based on Python threads and forking processes. 
-Despite the Global Interpreter Lock (GIL) which prevents Python from running multiple threads simultaneously, parallel processing occues when the work is performed
-in separated process. 
-This implies that for each task to be perfomed, an input file needs to be written before launching the process and the result file needs to be read and parsed after the end of the processing.
-When processing was doing loops of jobs, most of the time was spent in string manipulation for writing and parsing strings (for example: to compare pair-wise 10 frames it takes 45 process to be launched !)
+The role of the job manager is to ensure all the processing requested by the user interface are actually performed and that the client is warned in case of issue.
+%This subsection is purely technical and can be skipped. 
+
+EDNA was used as workflow manager for the previous data-analysis pipeline for many protein crystallography beamlines \cite{edna} and for the BioSAXS beamline at the ESRF \cite{BM29ODA}.
+The parallelization model used in EDNA is based on Python threads and forking processes which was wasting resources in serializing and inter-process communication. 
+%Despite the Global Interpreter Lock (GIL) which prevents Python from running multiple threads simultaneously, parallel processing occues when the work is performed in separated process. 
+%This implies that for each task to be perfomed, an input file needs to be written before launching the process and the result file needs to be read and parsed after the end of the processing.
+%When processing was doing loops of jobs, most of the time was spent in string manipulation for writing and parsing strings (for example: to compare pair-wise 10 frames it takes 45 process to be launched !)
  
-The \textit{dahu} workflow manager was designed for the TruSAXS beamline \cite{id02_2022} with those limitation in mind. 
-Text manipulation was simplified by switching from XML to JSON data-structure representation. 
-This modification alone has proven to speed up EDNA by a factor 3 !
-
-Most of the idea implemented in the EDNA framework were keps and the code was simplified to the extreme since \textit{dahu} represents only 1000 lines of code. 
-The scheduling of jobs is performed via a shared queue (hence First-in-First-out) and only a limited number of them are allowed to run simultaneously, via theads.
-The parallelization can only occure only in sections of code which release the GIL, this is why FreeSAS is mostly implemented in Cython (and GIL-free).      
+The \textit{dahu} job-manager was designed for the TruSAXS beamline \cite{id02_2022} with those limitation in mind. 
+%Text manipulation was simplified by switching from XML to JSON data-structure representation. 
+%This modification alone has proven to speed up EDNA by a factor 3 !
+The tango interface \cite{tango} was kept similar to the one in EDNA to ease the adoption.
+%, the adaptation was  framework were kept and the code was simplified to the extreme since \textit{dahu} represents only 1000 lines of code. 
+The scheduling of jobs is performed via a shared queue and only few worker are running simultaneously in threads.
+Thus the code runs actually in parallel only in sections where the Global Interpreter Lock (GIL) is released, like in Cython extensions from FreeSAS or in the OpenCL code from pyFAI \cite{pyFAI_gpu}.
 
 \subsubsection{Jobs}
+%The \textit{dahu-job} 
+%is the interface with the outer world. 
+manages the execution identifier, exposes the status and controls the execution of the underlying \textit{plugin}. %via the \textit{setup-process-teardown} sequence.
+%Unlike EDNA, in \textit{dahu}, only 
+Jobs see their input and output saved to the disk, this allow off-line reprocessing in case of issue during online data analysis.
 
-The \textit{dahu-job} is the interface with the outer world. 
-It manages the execution identifier, exposes the status and controls the execution workflow of the underlying plugin via the \textit{setup-process-teardown} sequence.
-Unlike EDNA, in \textit{dahu}, only jobs see their input and output saved to the disk to allow off-line reprocessing.   
+\subsubsection{Plugins}
+are Python \textit{functions} or \textit{classes} which are provided externally (by the beamline scientist) and implement the actual processing pipeline.
+Those plugins are fairly independent from the \textit{dahu} framework and easy to implement in pure Python.
+%For instance example the three plugins described in section \ref{pipeline} account each for about 700 lines of code.  
 
-\subsubsections{Plugins}
-Plugins are Python \textit{function} or \textit{classes} which are provided externally (by the beamlinee scientist) and implement the actual processing.
-The plugins are fairly independent of the \textit{dahu} framework and hence rather easy to implement in pure Python.
-For example the three plugins described in section \ref{pipeline} account each for about 700 lines of code.  
+%\subsubsection{Online processing}
+%Online processing is achieved by exposing \textit{dahu-jobs} via a Tango interface.
 
-\subsubsection{Online processing}
-Online processing is achieved by exposing \textit{dahu-jobs} via a Tango interface.
-
-\subsubsection{Offline processing}
-Dahu provides also a command-line tool, called \textit{dahu-reprocess} designed to (re-)execute one or several pipelines based on the job-description saved. 
-This tool is also used for testing pipelines offline.
-Dahu has virtually no dependencies (beside Python) and can deployed on any computer to reprocess complete datasets. 
-To reprocess data acquired at the BioSAXS beamline from ESRF, one would of course need FreeSAS and other dependencies, but all of them are publicly available and open source.
+\subsubsection{Offline re-processing}
+is possible from the command-line tool \textit{dahu-reprocess}.
+This tool was designed to (re-)execute one or several jobs based on the description saved by the online data analysis server. 
+% This tool is also used for testing analysis pipelines offline.
+Dahu has virtually no dependencies (beside \textit{numpy} and \textit{tango} for the server) and can be deployed on any computer to reprocess complete datasets. 
+Neverthless, to reprocess data acquired at the BioSAXS beamline, one would of course need FreeSAS and pyFAI and all the other dependencies, but all of them are publicly available and open source.
 
 \section{Data analysis pipelines}
 
 There are two main experiments performed at the BioSAXS beamline, either using the sample changer or the inline-chromatography setup.
-Thus, two analysis pipelines were built, one for each of those experimental setups, and a third pipeline acts as a pre-processor and contains the common part, 
-mainly related to the azimuthal integration of individual frames.
+Thus, two analysis pipelines were built, one for each of those experimental setups, and a third pipeline acting as a pre-processor and containing the common part related to the azimuthal integration of individual frames.
 
-Like all new detectors acquired at the ESRF during the upgrade, the Pilatus 2M detector used at the BioSAXS beamline is controled by the LIMA \cite{lima} 
-software which saves images in a HDF5 file-format \cite{hdf5} with several frames per file
-
- (typically 100 frames per file)
+Like all new detectors acquired at the ESRF during the second phase of the upgrade program, the Pilatus 2M detector used on the BioSAXS beamline is controled by the LIMA \cite{lima} software which saves images in a HDF5 file-format \cite{hdf5} with several (~100) frames per file.
 This permits compression, faster data-access, symbolic links to datasets from one file to another ... but it is dramatically different from the former pipeline which was triggered frame per frame.
 
-The versalitity of the HDF5 format allows to have only one output file for each of the processing pipeline, making backups easier as well. 
+The versatility of the HDF5 format allows to have a single output file for each of the processing pipeline, making backups easier as well. 
 Each pipeline registers the result of every processing step of the pipeline in the HDF5 file together with the associated configuration.
 Input datasets are also referenced using external links to the raw data to avoid data duplication. 
 Finally metadata describing the sample, its buffer and the configuration of the beamline are also registered using the Nexus convention \cite{nexus}.
 Each processing pipeline produces a single HDF5 file as output, which defines a *default* plot which tries to best summarize the experimental result to the user.
 ESRF provides tools like `silx view` \cite{silx}  and the web-viewer h5web \cite{silx} to visualize those files and explore them.
 
-Visualization via memcached.
 
-\subsection{Multi-frame Integration pipeline}
+\subsection{Multi-frame integration pipeline}
 
-Azimuthal integration is a common reduction step for all small angle scattering experiment, and the BioSAXS beamline uses
-pyFAI \cite{pyfai_2020} as core of its multiframe integration pipeline implemented in dahu.
-Thanks to the GPU-computing, pyFAI is able to integrate each frame within a milisecond.
+Azimuthal integration is a common reduction step for all small angle scattering experiments. 
+The BioSAXS beamline uses pyFAI \cite{pyfai_2020} as core of its \textit{multiframe} integration pipeline implemented in dahu.
+Thanks to the GPU-computing, pyFAI is able to integrate each frame within a millisecond.
 In order to avoid cross-correlation between neighboring bins, pixel splitting has been disabled.
-Frames are read from the HDF5 file produced by Lima \cite{lima} and all other metadata like the sample desciption and the beam-stop diode instensities
-are sent as part of the job description from BSXcube.  
+Frames are read from the HDF5 file produced by Lima \cite{lima} and all other metadata like the sample description and the transmitted  intensities (recorded by the beam-stop diode) are sent as part of the job description from 
+the graphical user interface running the beamline: BSXcube3 \cite{bm29_2022}.
+
+\begin{figure}
+\caption{Layout of a HDF5-file obtained from the multi-frame integration pipeline (view using the \textit{silx} software \cite{silx}}
+\includegraphics{multiframe}
+\end{figure}
+
 
 In sample changer mode, all frames are expected to be similar and needs to be merged but those exhibitting radiation damage should be discarded.
 Every single scattering curve is compared with all others within a file to build the correlation-map \cite{cormap}. 
@@ -322,7 +325,7 @@ The list of curves merged for buffer is stored in the output file and exhibits g
 providing additional hints on the sample elution time. .    
 Subsequently, all scattering curves are buffer subtracted (here performed in 1D \ldots should we do it in 2D?) and the
 peak-seaching is performed on the total scattering chromatogram, after median filtering for smoothing.
-This peak search is performed with the find_peaks_cwt function from the scipy library \cite{scipy} which provides a
+This peak search is performed with the find\_peaks\_cwt function from the scipy library \cite{scipy} which provides a
 list of peaks which are subsequently analyzed.
 
 Each fraction should correspond to a unique component, thus all subtracted curves associated to this region are merged and analysed
@@ -332,38 +335,31 @@ The results are presented the same way as in the sample-changer mode, one per fr
 The criteria for the fraction selection being rather soft, it common that empty fractions get analyzed and thus, 
 that the analysis fails. 
 
-All analyzed data are sent to the ISPyB database.     
+All analyzed data are sent to the ISPyB database \cite{ISPYBB}.     
 
-\section{Conclusion}
+\section{Discussions}
+
+
+Ab-initio reconstruction
+
+New microfluidic setup
 
 new IspyB for BioSAXS
 
+\section{Conclusion}
 
-\appendix
-\section{Appendix title}
+Summary of content
 
-Text text text text text text text text text text text text text text
-text text text text text text text.
+objectives
 
-\subsection{Title}
+Major findings 
 
-Text text text text text text text text text text text text text text
-text text text text text text text.
+Recommandation for future work
 
-\subsubsection{Title}
-
-Text text text text text text text text text text text text text text
-text text text text text text text.
-
-
-     %-------------------------------------------------------------------------
-     % The back matter of the paper - acknowledgements and references
-     %-------------------------------------------------------------------------
-
-     % Acknowledgements come after the appendices
+Futrure 
 
 \ack{Acknowledgements}
-The authors thank Guillaume Bonamis for his former contribution to the FreeSAS library and Jesse Hopkins from APS for the fruitfull 
+The authors thank Guillaume Bonamis for his former contribution to the FreeSAS library and Jesse Hopkins from APS for the fruitful 
 discussion and the the sharing of the code from BioXTAS-RAW.
 
 %\begin{references}
@@ -371,30 +367,6 @@ discussion and the the sharing of the code from BioXTAS-RAW.
 %first page--last page.}
 %\end{references}
 
-     %-------------------------------------------------------------------------
-     % TABLES AND FIGURES SHOULD BE INSERTED AFTER THE MAIN BODY OF THE TEXT
-     %-------------------------------------------------------------------------
-
-     % Simple tables should use the tabular environment according to this
-     % model
-
-\begin{table}
-\caption{Caption to table}
-\begin{tabular}{llcr}      % Alignment for each cell: l=left, c=center, r=right
- HEADING    & FOR        & EACH       & COLUMN     \\
-\hline
- entry      & entry      & entry      & entry      \\
- entry      & entry      & entry      & entry      \\
- entry      & entry      & entry      & entry      \\
-\end{tabular}
-\end{table}
-
-     % Postscript figures can be included with multiple figure blocks
-
-\begin{figure}
-\caption{Caption describing figure.}
-\includegraphics{fig1.ps}
-\end{figure}
 
 \bibliographystyle{iucr}
 \bibliography{biblio}
