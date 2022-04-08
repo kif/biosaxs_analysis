@@ -30,7 +30,7 @@
      % The title of the paper. Use \shorttitle to indicate an abbreviated title
      % for use in running heads (you will need to uncomment it).
 
-\title{New data analysis pipeline for the BioSAXS beamline at the ESRF}
+\title{New data analysis for BioSAXS at the ESRF}
 %\shorttitle{Short Title}
 
      % Authors' names and addresses. Use \cauthor for the main (contact) author.
@@ -38,7 +38,7 @@
      % Use lower-case letters in square brackets to link authors to their
      % affiliations; if there is only one affiliation address, remove the [a].
 
-\cauthor[a]{Jérôme}{Kieffer}{jerome.kieffer@esrf.fr}
+\cauthor[a]{Jérôme}{Kieffer}{jerome.kieffer@esrf.fr}{}
 \author[a]{Martha}{Brennich}
 \author[b]{Jean-Baptiste}{Florial}
 \author[a]{Marcus}{Oscarson}
@@ -82,13 +82,10 @@ Detailed presentation of the automatic data analysis pipelines for the BioSAXS b
 \end{synopsis}
 
 \begin{abstract}
-context
-purpose
-method
-major results
-major conclusions
-
-Abstract goes here.
+The second phase of the ESRF upgrade program did not only provided a new storage ring (EBS), it also allowed to refurbish several beamlines among which the BioSAXS one which got a larger detector in a new flight tube.
+To cope with the resulting increased flux of data, analysis software were rewritten to ensure real-time processing.
+This article describes the tool used to interface data-analysis with beamline control (\textit{dahu}) and the various SAXS analysis algorithms needed to reduce BioSAXS data (\textit{FreeSAS}). 
+Data-reduction pipelines are described for the different operation modes of the beamline either using the  sample-changer unit or using a size-exclusion chromatography setup.
 \end{abstract}
 
 
@@ -99,52 +96,48 @@ Abstract goes here.
      % and \subsubsection's as required.
 
 \section{Introduction}
-Small angle scattering (SAS) provides low resolution information on macromolecules and it is  
-particularly suited for biological sample thanks to the absence of lengthy preparation. 
-Biologists expects from SAXS experiment to retrieve the size and the shape of their protein or complex under study.
-Automated analysis is hence of crucial importance for them.
+Small angle scattering (SAS) provides low resolution information on macro-molecules and is  
+particularly suited for biological sample thanks to the absence of lengthy preparation.
+Unlike single crystal diffraction or NMR which offer atomic resolution, bioSAXS provides only information on the envelope of macro-molecules: it allows to validate the relative position of large structures and the assembly of biological complexes \cite{biosaxs_rev2018}. 
+Biologists expects from SAXS experiment the validation of the size and the shape of their protein or complex under study. 
+Since beamline users are neither synchrotron, nor SAXS specialists, a fully automated analysis is of crucial importance for them. 
+Automated data analysis should provided them not only with the reduced and pre-analyzed data but also with all metadata and parameters needed to get their results published according guidelines \cite{guidelines_2017} or  reprocessed them using third party software. 
 
-The BioSAXS \cite{BM29paper} beamline had an automated pipeline for the data-analysis which was based on EDNA\cite{EDNA} and the ATSAS\cite{ATSAS2}
-software. 
-While the outcome of the processing was very appreciated by our users, the system was already close to the maximal throughput possible in terms of performances. 
-The new EBS source \cite{EBS} of the ESRF not only provides a higher brilliance, but also new wiggler sources for former bending-magnet beamlines which triggered the re-build and the upgrade of most of them. 
-Thus the BioSAXS beamline has been rebuilt and features a new flight-tube with its Pilatus 2M detector mounted in vaccum. 
+The BioSAXS beamline from the European synchortron \cite{BM29paper} had an automated pipeline for the data-analysis which was based on EDNA \cite{EDNA} and was using the ATSAS \cite{ATSAS2} software underneath. 
+While the outcome of the processing was very appreciated by beamline users, the system was already close to the maximal throughput possible in terms of performances. 
+The new EBS source \cite{EBS} of the ESRF not only provides a higher brilliance, but also new wiggler sources for the former bending-magnet beamlines which triggered the re-build and the upgrade of most of them. 
+The BioSAXS beamline BM29 at the ESRF has been rebuilt in 2019 and features a new flight-tube with an upgraded  Pilatus 2M detector (planned to be) mounted in vacuum. 
 
-This contribution is divided in two main parts, starting with presentation of the tools used for 
-processing SAS data (\textit{FreeSAS}) and for assembling pipelines (\textit{Dahu}).
-Then the different pipelines are presented, the common for the reduction of the scattering images and two dedicated for sample-changer and SEC-SAXS experiments.      
+This contribution is divided in two main parts, starting with a presentation of the tools used for 
+processing SAS data (\textit{FreeSAS}) and for assembling pipelines (\textit{dahu}).
+Then three different pipelines are presented: a common one used for the reduction of the scattering images and two dedicated for sample-changer-based experiments and another one dealing with chronological data used with the size exclusion chromatography experiments.      
 
 \section{Tools}
 
-To reach the 10-fold speed up expected from the new EBS source and the new detector (Upgrade from a Pilatus 1M to a 2M with a thick sensor, mounted \textit{in vacuum})
-all software used at the beamline was upgraded.
-Precise benchmarking of the execution times of the previous EDNA-based pipeline demonstated that 
+To reach the 10-fold speed-up expected from the new EBS source and the new detector (upgraded from a Pilatus 1M to a 2M) all software used at the beamline was upgraded.
+Precise benchmark of the execution times of the previous EDNA-based pipeline demonstrated that 
 most time was spent in launching external tools coming from the ATSAS suite and in parsing text files produced by those tools.
-It was descided to rewrite all pipeline in plain Python \cite{python} and call SAS-related tasks from a library, \textit{FreeSAS}. 
-Finally the interface to the control software, Bliss \cite{bliss}, would go via Tango \cite{tango} and use a simple FIFO task scheduler,  \textit{dahu}, 
-already used in production on another SAXS beamline at the ESRF: ID02\cite{ID02}.   
+It was decided to rewrite all pipeline in plain Python \cite{python} and call SAS-related tasks from a library, \textit{FreeSAS}. 
+Finally the interface to the control software, Bliss \cite{bliss}, would go via Tango \cite{tango} and use a simple FIFO task scheduler,  \textit{dahu}, already used in production on the TruSAXS beamline \cite{id02_2022}.   
 
-\subsection{The SAS processing tools, \textit{FreeSAS}}
+\subsection{Small angle scattering analysis tools, \textit{FreeSAS}}
 
-\textit{FreeSAS} is a Python\cite{python} library containing SAS analysis tools available both via command like interface and from the Python API. 
+\textit{FreeSAS} is a Python \cite{python} library containing SAS-analysis tools available both via command line interface and from a Python API. 
 It does not claim to be as complete as the ATSAS counterpart,
 but is free, released under the MIT license (i.e. it can be included in commercial products), all source code is available publicly on github \cite{freesas} and
-open to contributions.
-Despite Python being an interpreted language, FreeSAS is performance oriented and most of the processing is performed in Cython\cite{cython} extensions written in C 
-to obtain the seeked performances. 
-All the code has been made available and packaged independently from the online analysis tools to offer ESRF users and other scientists
-the ability to reprocess their data and compare the processing between software and sources.
+open to external contributions.
+Despite Python being an interpreted language, FreeSAS is performance oriented and most of the processing is performed in Cython \cite{cython} extensions written in C to obtain the sought performances. 
+All the code has been made available and packaged independently from the online analysis tools to offer ESRF users and other scientists the ability to reprocess their data and compare the results with other software.
 
-\subsubsection{SAS plotting}
+\subsubsection{SAS plotting:} The \textit{freesas} CLI tool provide a way to plot the SAS curve: $I=f(q)$ where $q = 4\pi sin(2\theta/2)/\lambda$ together with some basic analysis which are described in the next sections.
 
-TODO: insert an image  of the tool
-Note:
-$q = 4\pi sin(2\theta/2)$
+
+
 
 \subsubsection{Guinier region fitting}
 Guinier analysis \cite{guinier} is usually the first analysis performed in BioSAXS to determine the radius of gyration ($R_g$)of the macromolecule (and the forwards scattering value $I_0$.
-$R_g$ is obtained from the slope of a linear regression of $ln(I)$ as function of $q^2$ on the proper q-range where this curve is afine (the Guinier-range).
-The selection of the Guinier-range is far from being obvious since most of subsequent analysis depend on the proper assesement of this regions, 
+$R_g$ is obtained from the slope of a linear regression of $ln(I)$ as function of $q^2$ on the proper q-range where this curve is linear (the Guinier-range).
+The selection of the Guinier-range is far from being obvious since most of subsequent analysis depend on the proper assessment of this regions, 
 multiple implementation are provided: \textit{autorg.py} which derives from the BioXTAS-RAW\cite{bioxtasraw}, \textit{auto_guinier.py} which differs from the BioXTAS-RAW
 one by searching for a consensus region rather than the best region. 
 \textit{auto_gpa.py} performs a Guinier-peak-analysis\cite{gpa}, which is a quick assessment of the $R_g$ and $I_0$ and sometimes less robust than the two other implementations. 
@@ -181,8 +174,8 @@ in separated process.
 This implies that for each task to be perfomed, an input file needs to be written before launching the process and the result file needs to be read and parsed after the end of the processing.
 When processing was doing loops of jobs, most of the time was spent in string manipulation for writing and parsing strings (for example: to compare pair-wise 10 frames it takes 45 process to be launched !)
  
-The \textit{dahu} workflow manager was designed for the TruSAXS beamline \cite{ID02} with those limitation in mind. 
-Text manipulation was simplfied by switching from XML to JSON data-structure representation. 
+The \textit{dahu} workflow manager was designed for the TruSAXS beamline \cite{id02_2022} with those limitation in mind. 
+Text manipulation was simplified by switching from XML to JSON data-structure representation. 
 This modification alone has proven to speed up EDNA by a factor 3 !
 
 Most of the idea implemented in the EDNA framework were keps and the code was simplified to the extreme since \textit{dahu} represents only 1000 lines of code. 
@@ -336,7 +329,7 @@ All analyzed data are sent to the ISPyB database.
 
 \section{Conclusion}
 
-
+new IspyB for BioSAXS
 
 
 \appendix
