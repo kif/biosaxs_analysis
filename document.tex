@@ -21,6 +21,8 @@
                                   %   M - IUCrJ
                                   %   S - Journal of Synchrotron Radiation
 \usepackage{graphicx}
+\graphicspath{ {./} }
+
 \begin{document}                  % DO NOT DELETE THIS LINE
 
      %-------------------------------------------------------------------------
@@ -223,28 +225,26 @@ The versatility of the HDF5 format allows to have a single output file for each 
 Each pipeline registers the result of every processing step of the pipeline in the HDF5 file together with the associated configuration.
 Input datasets are also referenced using external links to the raw data to avoid data duplication. 
 Finally metadata describing the sample, its buffer and the configuration of the beamline are also registered using the Nexus convention \cite{nexus}.
-Each processing pipeline produces a single HDF5 file as output, which defines a *default* plot which tries to best summarize the experimental result to the user.
-ESRF provides tools like `silx view` \cite{silx}  and the web-viewer h5web \cite{silx} to visualize those files and explore them.
-
+Each processing pipeline produces a single HDF5 file as output, which defines a \textit{default} plot which tries to best summarize the experimental result to the user.
+ESRF provides several tools to visualize those HDF5 files like \textit{silx view} \cite{silx} which is a graphical user interface based on Qt \cite{pyqt} or the web-viewer \textit{h5web} \cite{h5web} to visualize those files inside a web-browser.
+This \textit{h5web} is already used in the beamline control user interface BsxCuBE3 \cite{bm29_2022} and will be used in the new ISPyB interface (under development).
 
 \subsection{Multi-frame integration pipeline}
 
 Azimuthal integration is a common reduction step for all small angle scattering experiments. 
-The BioSAXS beamline uses pyFAI \cite{pyfai_2020} as core of its \textit{multiframe} integration pipeline implemented in dahu.
+The BioSAXS beamline uses pyFAI \cite{pyfai_2020} as core of its \textit{multiframe} integration pipeline implemented in \textit{dahu}.
 Thanks to the GPU-computing, pyFAI is able to integrate each frame within a millisecond.
-In order to avoid cross-correlation between neighboring bins, pixel splitting has been disabled.
-Frames are read from the HDF5 file produced by Lima \cite{lima} and all other metadata like the sample description and the transmitted  intensities (recorded by the beam-stop diode) are sent as part of the job description from 
-the graphical user interface running the beamline: BSXcube3 \cite{bm29_2022}.
+In order to avoid cross-correlation between neighboring bins, pixel splitting is disabled.
+Frames are read from the HDF5 file produced by \textit{LImA} \cite{lima} and all other metadata like the sample description and the transmitted  intensities (recorded by the beam-stop diode) are sent as part of the job description from BsxCuBE3, the graphical user interface running the beamline.
 
 \begin{figure}
-\caption{Layout of a HDF5-file obtained from the multi-frame integration pipeline (view using the \textit{silx} software \cite{silx}}
-\includegraphics{multiframe}
+\caption{Layout of a HDF5-file obtained from the multi-frame integration pipeline, visualized with the \textit{silx} software \cite{silx}.}
+\includegraphics{multiframe.png}
 \end{figure}
 
-
-In sample changer mode, all frames are expected to be similar and needs to be merged but those exhibitting radiation damage should be discarded.
-Every single scattering curve is compared with all others within a file to build the correlation-map \cite{cormap}. 
-This allows to determine a group of frames which are equivalent based on two threshold, the minimum probablity for two adjacent frames 
+In sample changer mode, all frames are expected to be similar and needs to be merged, except the ones exhibiting radiation damage which should be discarded.
+For this, every single scattering curve is compared with all others within a file to build the correlation-map \cite{cormap}. 
+This allows to determine the largest group of frames which are equivalent based on two threshold, the minimum probability for two adjacent frames 
 and for frames which are not adjacent. 
 
 Frames found equivalent in the CorMap analysis are averaged taking into account normalization from the beam-stop diode value. 
