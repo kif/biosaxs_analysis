@@ -231,50 +231,81 @@ This \textit{h5web} is already used in the beamline control user interface BsxCu
 
 \subsection{Multi-frame integration pipeline}
 
-Azimuthal integration is a common reduction step for all small angle scattering experiments. 
-The BioSAXS beamline uses pyFAI \cite{pyfai_2020} as core of its \textit{multiframe} integration pipeline implemented in \textit{dahu}.
-Thanks to the GPU-computing, pyFAI is able to integrate each frame within a millisecond.
-In order to avoid cross-correlation between neighboring bins, pixel splitting is disabled.
-Frames are read from the HDF5 file produced by \textit{LImA} \cite{lima} and all other metadata like the sample description and the transmitted  intensities (recorded by the beam-stop diode) are sent as part of the job description from BsxCuBE3, the graphical user interface running the beamline.
+The figure \ref{multiframe} presents a file produced by the \textit{multi-frame} integration pipeline with the default visualization consisting in the curve $I = f(q)$. 
+There are four subsequent analysis steps:
+\begin{enumerate}
+\item Each frame is azimuthally integrated to produce scattering curves
+\item Scattering curves are compared to to assess radiation damage
+\item Equivalent frames are averaged together
+\item The averaged frame is finally azimuthally integrated
+\end{enumerate}
+The HDF5-file contains in addition external links to the raw frames as acquired by the detector.
 
 \begin{figure}
 \caption{Layout of a HDF5-file obtained from the multi-frame integration pipeline, visualized with the \textit{silx} software \cite{silx}.}
-\includegraphics{multiframe.png}
+\includegraphics{multiframe}
+\label{multiframe}
 \end{figure}
 
-In sample changer mode, all frames are expected to be similar and needs to be merged, except the ones exhibiting radiation damage which should be discarded.
-For this, every single scattering curve is compared with all others within a file to build the correlation-map \cite{cormap}. 
-This allows to determine the largest group of frames which are equivalent based on two threshold, the minimum probability for two adjacent frames 
-and for frames which are not adjacent. 
+Azimuthal integration is a common reduction step for all small angle scattering experiments. 
+The BioSAXS beamline uses \textit{pyFAI} \cite{pyfai_2020} as core of its \textit{multiframe} integration pipeline.
+Thanks to the GPU-computing, \textit{pyFAI} is able to integrate each frame within a millisecond.
+In order to avoid cross-correlation between neighboring bins, pixel splitting is disabled.
+Frames are read from the HDF5 file produced by \textit{LImA} \cite{lima} and all other metadata like the sample description and the transmitted  intensity (recorded on the beam-stop diode) are sent as part of the job description from BsxCuBE3, the graphical user interface running the beamline.
 
-Frames found equivalent in the CorMap analysis are averaged taking into account normalization from the beam-stop diode value. 
+In sample changer mode, all frames are expected to be similar and needs to be merged, except the ones exhibiting radiation damage which should be discarded.
+For this, every single scattering curve is compared with all others to build the correlation-map \cite{cormap}. 
+This map allows to determine the largest group of frames which are equivalent based on two threshold, the minimum probability for two adjacent frames to be the same and the threshold for frames which are not adjacent. 
+
+Frames found equivalent in the correlation-map analysis are averaged taking into account normalization from the beam-stop diode value. 
 The uncertainties for pixel values is propagated assuming Poisson statistics. 
 %The standard deviation of each pixel in the stack of equivalent frames was found noticably lower than the propagated variance, assuming a Poisson statistic.
-The averaged frame (with its associated uncertainties) is finally azimuthaly integrated with pyFAI and stored in the output file . 
-The SAXS plot $I = f(q)$ is set as the default representation of this output file so that .
+The averaged frame (with its associated uncertainties) is finally azimuthally integrated with pyFAI and stored in the output file. 
+The SAXS plot $I = f(q)$ is set as the default representation of this output file.
 
-In chromatography mode, the aquisition occures typically over half an hour representing thousand images at 1Hz aquisition rate. 
+In chromatography mode, the acquisition occurs typically over half an hour representing thousand images at 1Hz acquisition rate. 
 This results in several HDF5-files containing partial chromatograms.
 The total scattering is computed by summing all intensities in each of the curve to build a simple chromatogram $I_{sum} = f(t)$ 
-which indicates weather a sample elluted from the chromatography column or not. 
-This (partial) chromatogram is the default plot for this integrated file.  
+which indicates weather a sample eluted from the chromatography column or not. 
+This (partial) chromatogram is the default plot for this type of integrated file.
 
 \subsection{Sample-changer pipeline}
 In sample changer mode, solution containing samples are acquired interleaved with pure buffer solutions.
-The processing is triggered with the sample filename, i.e. the name of the file contraining the sample data after azimuthal integration and a list of 
+The processing is triggered with the sample filename, i.e. the name of the file containing the sample data after azimuthal integration and a list of 
 buffer files corresponding to the acquisition of buffers (usually the buffer before and the buffer after the sample acquisition). 
+This produces a new HDF5 file with the subtracted data in it, such file is visualized in figure \ref{subtracted}
+and contains the results of the 7-stage pipeline: 
+\begin{enumerate}
+    \item Comparison of buffer curves;
+    \item Buffer subtraction on the frame level;
+    \item Azimuthal integration of the subtracted frame;
+    \item Guinier analysis;
+    \item Dimensionless Kratky plot;
+    \item Rambo-Tainer invariant calculation;
+    \item Fourier inversion using the BIFT algorithm.
+\end{enumerate}
+As previously, there is a link to the source data as stage zero of the processing to ensure a perfect tracking of the experiment.
 
-Integrated buffer data are compared with the CorMap algorithm in order to validate acquired buffer matches, 
-If they don't, the largest concomittent region is selected. 
+\begin{figure}
+\label{subtracted}
+\begin{center}
+\includegraphics{Figure_1}
+\caption{Default visualization of the HDF5-file produced by the sample changer pipeline with the \textit{silx} viewer}
+\end{center}
+\end{figure}
+
+
+Integrated buffer data are compared with the correlation-map algorithm in order to validate that acquired buffer matches, 
+If they don't, only the buffer acquires prior to the sample acquisition is considered
 Averaging of the buffer signal and subtraction of the buffer from sample data are both performed on the 
 2D frames. 
-Working on the 2D data frames allows a better preservation of weak signals and cancel-out systematic deviation
+Working on the 2D data frames allows a better preservation of weak signals and cancels-out systematic deviation
 from certain pixels.
-The subtracted frame is then integrated using pyFAI and the associated uncertainties propagated according to \cite{pyfai_2020}.
+The subtracted frame is then integrated using \testit{pyFAI} and the associated uncertainties propagated according to \cite{pyfai_2020}.
 
 The subtracted SAXS curve is then analyzed with Guinier fit (all three algorithms available in FreeSAS are tested)
 to provide the hydrodynamic radius of gyration, $R_g$ and the forwards scattering intensity $I_0$, 
-Kratky plot to provide some assessement on the compacity or if the sample is unfolded. 
+Kratky plot to provide some assessment on the compacity or if the sample is unfolded. 
 Finally, the inverse Fourier is obtained from BIFT and provides the diameter $D_{max}$, the pair-distribution 
 and confirms the radius of gyration.
 After the analysis, the volume is calculated from the Porod formula, and the Rambo-Tainer invariants provide 
