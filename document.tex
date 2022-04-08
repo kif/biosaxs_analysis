@@ -99,7 +99,7 @@ Data-reduction pipelines are described for the different operation modes of the 
 
 \section{Introduction}
 Small angle scattering (SAS) provides low resolution information on macro-molecules and is  
-particularly suited for biological sample thanks to the absence of lengthy preparation.
+particularly suited for biological samples thanks to the absence of lengthy preparation.
 Unlike single crystal diffraction or NMR which offer atomic resolution, bioSAXS provides only information on the envelope of macro-molecules: it allows to validate the relative position of large structures and the assembly of biological complexes \cite{biosaxs_rev2018}. 
 Biologists expects from SAXS experiment the validation of the size and the shape of their protein or complex under study. 
 Since beamline users are neither synchrotron, nor SAXS specialists, a fully automated analysis is of crucial importance for them. 
@@ -116,7 +116,7 @@ Then three different pipelines are presented: a common one used for the reductio
 
 \section{Tools}
 
-To reach the 10-fold speed-up expected from the new EBS source and the new detector (upgraded from a Pilatus 1M to a 2M) all software used at the beamline was upgraded.
+To reach the 50-fold speed-up expected from the new EBS source and the new detector (upgraded from a Pilatus 1M to a 2M), all software used at the beamline has been upgraded.
 Precise benchmark of the execution times of the previous EDNA-based pipeline demonstrated that 
 most time was spent in launching external tools coming from the ATSAS suite and in parsing text files produced by those tools.
 It was decided to rewrite all pipeline in plain Python \cite{python} and call SAS-related tasks from a library, \textit{FreeSAS}. 
@@ -124,11 +124,11 @@ Finally the interface to the control software, Bliss \cite{bliss}, would go via 
 
 \subsection{Small angle scattering analysis tools, \textit{FreeSAS}}
 
-\textit{FreeSAS} is a Python \cite{python} library containing SAS-analysis tools available both via command line interface and from a Python API. 
+\textit{FreeSAS} is a Python library containing SAS-analysis tools available both via command line interface and from a Python API. 
 It does not claim to be as complete as the ATSAS counterpart,
 but is free, released under the MIT license (i.e. it can be included in commercial products), all source code is available publicly on github \cite{freesas} and
 open to external contributions.
-Despite Python being an interpreted language, FreeSAS is performance oriented and most of the processing is performed in Cython \cite{cython} extensions written in C to obtain the sought performances. 
+Despite Python being an interpreted language, FreeSAS is performance oriented and most of the processing is performed with Cython \cite{cython} extensions written in C to obtain the sought performances. 
 All the code has been made available and packaged independently from the online analysis tools to offer ESRF users and other scientists the ability to reprocess their data and compare the results with other software.
 
 \subsubsection{SAS plotting:} The \textit{freesas} CLI tool provide a way to plot the SAS curve: $I=f(q)$ where $q = 4\pi sin(2\theta/2)/\lambda$ together with some basic analysis which are described in the next sections.
@@ -147,30 +147,30 @@ All the code has been made available and packaged independently from the online 
 the first analysis performed on bioSAXS data is to determine the hydrodynamic radius of gyration ($R_g$) of the macromolecule and the forwards scattering value $I_0$.
 $R_g$ is obtained from the slope of a linear regression of $ln(I)$ as function of $q^2$ on the proper q-range (the Guinier-region) where this curve is linear at low $q$ ($q \cdot R_g<1.3$).
 The selection of the Guinier-region is far from being obvious and most of subsequent analysis depend on the $R_g$ value.
-Thus multiple implementation are provided: \textit{autorg}, which derives from the implementation in BioXTAS-RAW \cite{bioxtasraw}; \textit{auto-guinier}, which searches for a consensus region rather than the best possible Guinier-region; and finally \textit{auto-gpa},, which performs a Guinier-peak-analysis \cite{gpa}. 
+Thus multiple implementation are provided: \textit{autorg}, which derives from the implementation in BioXTAS-RAW \cite{bioxtasraw}; \textit{auto-guinier}, which searches for a consensus region rather than the best possible Guinier-region; and finally \textit{auto-gpa}, which performs a Guinier-peak-analysis \cite{gpa}. 
 The later is a quick assessment of the $R_g$ and $I_0$, sometimes less robust than the two other implementations, but suitable when many datasets are to be analyzed like in chromatography mode.
 It is worth mentioning that none of the three algorithms are provided the exact same results as the original \textsc{autorg} \cite{ATSAS2} version from ATSAS. 
 This highlights the importance of publishing the actual implementation of the algorithms with the associated numerical parameters used in it.
   
-\subsubsection{Pair distribution function}
-Despite the scattering curve ($I(q)$) is the Fourier transform of the pair distribution function $p(r)$, the later cannot directly be obtained from the
+\subsubsection{Pair distribution function:}
+Despite the scattering curve $I(q)$ is the Fourier transform of the pair distribution function $p(r)$, the later cannot directly be obtained from the
 inverse Fourier transform (IFT) due to the loss of phase information and the limited amount of information in the scattering curve. 
-This ill-posed mathematical has not exact solution and is usually inverted with some extra constraints imposed, like the finite size of the support (defined by the maximum diameter, $Dmax$).    
-FreeSAS proposes an IFT based on the Bayesian statistics and derived from BIFT\cite{bift}, like the one found in \cite{bioxtasraw}.
+This ill-posed mathematical problem has not exact solution and is usually inverted with some extra constraints imposed, like the finite size of the support (defined by the maximum diameter, $Dmax$).    
+FreeSAS proposes an IFT based on the Bayesian statistics and derived from BIFT \cite{bift}, like the one found in \cite{bioxtasraw}.
 %The command-line program to perfrom and IFT is \textit{bift.py}. 
-Despite different approach, the results of \textit{bift} is similar to the \textsc{datgnom} \cite{ATSAS1} from ATSAS which uses a Tikhonov's regularization.
+Despite different approach, the result of \textit{bift} is similar to the \textsc{datgnom} \cite{ATSAS1} from ATSAS which uses a Tikhonov's regularization.
 The diameter found, $Dmax$, is directly comparable with the one provided by ATSAS, but the parameter $\alpha$ differs since the theory used for the regularisation differs. 
 
-\subsubsection{Equivalence of scattering curves}
+\subsubsection{Equivalence of scattering curves: }
 To obtains the best possible signal from the sample, the capillary is exposed multiple times with a short exposure time.
 All equivalent frames are then merged to optimized the signal/noise ratio without polluting the signal with radiation damage.  
-The equivalence of frames is obtained from the \textit{CorMap} \cite{cormap} implementated from the publication. 
+The equivalence of a coupld of frames is obtained from the correlation-map algorithm implemented from the publication \citeasnoun{cormap}.
 
-\subsubsection{Overlay of bead models}
-FreeSAS features also \textit{subpycomp} \cite{BM29ODA}, a tool to rotate/flip bead models and overlay them prior to merge them. It is equivalent to the SUPCOMB\cite{supcomb} tool from ATSAS. 
+\subsubsection{Overlay of bead models:}
+\textit{subpycomp} \cite{BM29ODA}, a tool to rotate/flip bead models and overlay them prior to merging them. It is equivalent to the \textsc{supcomb} \cite{supcomb} tool from ATSAS. 
 
-\subsubsection{Extraction to ASCII data:} With the increased frame-rate of the new beamline, the historical 3-column text file with $q$, $<I>$, $\sigma(I)$ became unpractical and has been superseded by the hierarchical-data format \cite{hdf5} which contains all analysed data derived from raw data.
-The \textit{extract-ascii} tool from FreeSAS is designed to regenerate those text files and offer a compatibility with third-party tools.
+\subsubsection{Extraction to ASCII data:} with the increased frame-rate of the new beamline, the historical 3-column text file with $q$, $<I>$, $\sigma(I)$ became unpractical and has been superseded by the hierarchical-data format, HDF5 \cite{hdf5} which contains all analysed data derived from raw data.
+The \textit{extract-ascii} tool is designed to regenerate those text files and offer a compatibility with third-party tools.
 
 \subsection{The job-manager: \textit{dahu}}
 
@@ -194,7 +194,7 @@ Thus the code runs actually in parallel only in sections where the Global Interp
 \subsubsection{Jobs}
 %The \textit{dahu-job} 
 %is the interface with the outer world. 
-manages the execution identifier, exposes the status and controls the execution of the underlying \textit{plugin}. %via the \textit{setup-process-teardown} sequence.
+manage the execution identifier, exposes the status and controls the execution of the underlying \textit{plugins}. %via the \textit{setup-process-teardown} sequence.
 %Unlike EDNA, in \textit{dahu}, only 
 Jobs see their input and output saved to the disk, this allow off-line reprocessing in case of issue during online data analysis.
 
@@ -379,12 +379,14 @@ The criteria for the fraction selection being intentionally soft, it is common t
 \section{Conclusion}
 
 This paper introduces the \textit{FreeSAS} and the \textit{dahu} software packages which are used respectively to analyse bio-SAS data and control online data analysis. 
-Those two packages are combined to provide complete data analysis pipelines.
+Those two packages are combined with other to provide complete data analysis pipelines.
 The three pipelines described in this contribution are used in production at the BioSAXS beamline 
-since 2020, and provide real-time feed-back of the ongoing experiment to the user.
+since 2020, and they provide real-time feed-back of ongoing experiment to the user.
+All metadata, all parameters and all references to the data source are recorded together with the processed data into
+a single HDF5 files which offers convenient storage and allows reproducible science in the FAIR principle. 
 
-The foreseeable future should replace of the legacy version of the ISPyB database with a new one which will include better web visualization capabilities.
-Future work will focus on \textit{ab-initio} shape reconstruction which is currently too slow to run with thee real-time constrains of the beamline.
+The foreseeable future should replace of the legacy version of the ISPyB database with a new one which will include better web visualization capabilities of those HDF5 files.
+Future algorithmic work will focus on \textit{ab-initio} shape reconstruction which is currently too slow to run with real-time constrains at the beamline.
 
 
 \ack{Acknowledgements:}
