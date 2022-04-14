@@ -137,7 +137,7 @@ Despite Python being an interpreted language, FreeSAS is performance oriented an
 \begin{figure}
 \label{plot}
 \begin{center}
-\includegraphics[width=12cm]{Figure_1}
+\includegraphics[width=12cm]{Figure_1.eps}
 \caption{Default visualization of bioSAS data with automated analysis}
 \end{center}
 \end{figure}
@@ -164,7 +164,7 @@ The diameter found, $Dmax$, is directly comparable with the one provided by ATSA
 \subsubsection{Equivalence of scattering curves: }
 To obtains the best possible signal from the sample, the capillary is exposed multiple times with a short exposure time.
 All equivalent frames are then merged to optimized the signal/noise ratio without pollution from radiation damaged data.  
-The equivalence of a couple of frames is obtained from the correlation-map (CorMap) algorithm implemented from the publication by \citeasnoun{cormap}.
+The equivalence of a couple of frames is obtained from the correlation-map (CorMap) algorithm implemented from the publication by \citeasnoun{CorMap}.
 
 \subsubsection{Overlay of bead models:}
 \textit{subpycomp} \cite{BM29ODA}, a tool to rotate/flip bead models and overlay them prior to merging them. It is equivalent to the \textsc{supcomb} \cite{supcomb} tool from ATSAS. 
@@ -226,7 +226,7 @@ The figure \ref{multiframe} presents a file produced by the \textit{multi-frame 
 There are four subsequent analysis steps:
 \begin{enumerate}
 \item Each frame is azimuthally integrated with \textit{pyFAI} \cite{pyfai_2020} to produce scattering curves;
-\item Scattering curves are compared to to assess radiation damage using the \textit{CorMap} \cite{CORMAP} algorithm;
+\item Scattering curves are compared to to assess radiation damage using the \textit{CorMap} \cite{CorMap} algorithm;
 \item Equivalent frames are averaged together, weighted by the beam-stop diode intensity; 
 \item The averaged frame is finally azimuthally integrated. 
 \end{enumerate}
@@ -250,7 +250,7 @@ The HDF5-file contains in addition external links to the raw frames as acquired 
 %Frames are read from the HDF5 file produced by \textit{LImA} \cite{lima} and all other metadata like the sample description and the transmitted  intensity (recorded on the beam-stop diode) are sent as part of the job description from BsxCuBE3, the graphical user interface running the beamline.
 
 %In sample changer mode, all frames are expected to be similar and needs to be merged, except the ones exhibiting radiation damage which should be discarded.
-%For this, every single scattering curve is compared with all others to build the correlation-map \cite{cormap}. 
+%For this, every single scattering curve is compared with all others to build the correlation-map \cite{CorMap}. 
 %This map allows to determine the largest group of frames which are equivalent based on two threshold, the minimum probability for two adjacent frames to be the same and the threshold for frames which are not adjacent. 
 
 %Frames found equivalent in the correlation-map analysis are averaged taking into account normalization from the beam-stop diode value. 
@@ -273,7 +273,7 @@ buffer files corresponding to the different acquisition of buffers, usually the 
 This produces a new HDF5 file with the subtracted data in it, such file is visualized in figure \ref{subtracted}
 and contains the results of this 8-stage pipeline: 
 \begin{enumerate}
-    \item Comparison of buffer curves using the CorMap algorithm \cite{CORMAP};
+    \item Comparison of buffer curves using the CorMap algorithm \cite{CorMap};
     \item Buffer frames are averaged together and subtracted from the sample averaged frame;
     \item Azimuthal integration of the subtracted frame with pyFAI;
     \item Guinier analysis with the associated linear regression of $log(I) = f(q^2)$ at low $q$ as default plot;
@@ -288,7 +288,7 @@ The $p=f(r)$ plot obtained from BIFT allows to simulated the scattering curve $I
 \begin{figure}
 \label{subtracted}
 \begin{center}
-\includegraphics[width=12cm, height=10cm]{Figure_1.png}
+\includegraphics[height=10cm]{Figure_3.eps}
 \caption{Default visualization of the HDF5-file produced by the sample changer pipeline with the \textit{silx} viewer}
 \end{center}
 \end{figure}
@@ -332,7 +332,7 @@ This chromatography pipeline has six stages:
 \begin{figure}
 \label{hplc}
 \begin{center}
-\includegraphics{hplc}
+\includegraphics[width=12cm]{hplc}
 \caption{Default visualization of the HDF5-file produced by the \textsc{hplc} pipeline with the \textit{silx} viewer}
 \end{center}
 \end{figure}
@@ -388,12 +388,15 @@ The table \ref{stats} summarizes some figures collected:
 The run-time for multi-frame integration presents a clear bi-modal distribution since the same code is used in sample-changer mode (10 frames/acquisition) and in HPLC mode where 100 frames are acquired per file.
 From those figures, one can estimate HPLC-mode represents 6\% of the measurement performed which accounts for 72\% of the total exposure time.
 
+\subsection{Performances}
 
-Everything is executed on a single computer, single processor (6 cores) with an entry-level graphics card. During those 20 month, the \textit{dahu}-server has been started 90 times, which corresponds to the weekly restart to apply security patches and other bug-corrections. 
-Since all data-reduction occurs within the same process using threads, this proves not only the reliability of the \textit{dahu}-server but also of the whole pipeline including FreeSAS analysis.
-\subsection{outlook}
-Future development include adaptation for the micro-fluidic setup, and for the new ISPyB database under development. 
-Another major development will be the \textit{ab-inito} modeling based on SAXS data for which one 
+Everything is executed on a single computer, single processor (featuring 6 cores) with an entry-level graphics card. 
+During those 20 month, the \textit{dahu}-server has been started 90 times, which corresponds to the weekly restart to apply security patches and other bug-corrections. 
+Since all data-reduction occurs within the same process using threads, this demonstrates not only the reliability of the \textit{dahu}-server 
+but also of the whole pipeline including \textit{FreeSAS} analysis.
+\subsection{Outlook}
+%Future development include adaptation for the micro-fluidic setup, and for the new ISPyB database under development. 
+%Another major development will be the \textit{ab-inito} modeling based on SAXS data for which one 
 %Ab-initio reconstruction
 %New microfluidic setup
 % new IspyB for BioSAXS
@@ -403,10 +406,17 @@ Future algorithmic work will focus on \textit{ab-initio} shape reconstruction, b
 
 \section{Conclusion}
 
-This document introduces the \textit{FreeSAS} and the \textit{dahu} software packages which are used respectively to analyse bio-SAS data and control online data analysis at the BioSAXS beamline at the European synchrotrom. 
+This document introduces the \textit{FreeSAS} and the \textit{dahu} software packages which are used respectively to analyse bioSAXS data 
+and control online data analysis at the BioSAXS beamline at the European synchrotron. 
 Those two packages are combined with others to provide complete data analysis pipelines.
-The three pipelines described in this contribution are used in production since 2020, and provide real-time feed-back of ongoing experiment to the user.
-All metadata, all parameters and all references to the source data are recorded together with the processed data into a single HDF5 files which offers not only convenient storage but allows also reproducible science in the FAIR principle. 
+The three pipelines described in this contribution are used in production since 2020, and provide real-time feed-back of ongoing experiments to the user.
+All metadata, all parameters and all references to the source data are recorded together with the processed data into a single HDF5 files which offers 
+not only convenient storage but allows also reproducible science in the FAIR principle. 
+
+\appendix
+\section{Method}
+
+All figures were obtained from test-samples used at the beamline: Bovine serum albumin (BSA) in solution a 5mg/mL in a HEPES buffer.
 
 \ack{Acknowledgements:}
 The authors wish to thank Guillaume Bonamis for his former contribution to the FreeSAS library and Jesse Hopkins from APS for the fruitful discussion and the the sharing of the code from BioXTAS-RAW.
