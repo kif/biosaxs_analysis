@@ -277,7 +277,7 @@ and contains the results of this 8-stage pipeline:
     \item Buffer frames are averaged together and subtracted from the sample averaged frame;
     \item Azimuthal integration of the subtracted frame with pyFAI;
     \item Guinier analysis with the associated linear regression of $log(I) = f(q^2)$ at low $q$ as default plot;
-    \item Dimensionless Kratky plot: $q^2\cdot R_g^2\cdot I/I_0 = f(q\cdot R_g)$;
+    \item Dimensionless Kratky plot: $(q\cdot R_g)^2\cdot I/I_0 = f(q\cdot R_g)$;
     \item Porod \cite{glatter+kratky} and Rambo-Tainer invariants \cite{RamboTainerNature2013} to assess the the molecular volume and weight of the sample;
     \item Fourier inversion using the BIFT algorithm \cite{bift} provides the $p=f(r)$ plot
     \item Send reduced data to ISPyB for BioSAXS.
@@ -289,7 +289,8 @@ The $p=f(r)$ plot obtained from BIFT allows to simulated the scattering curve $I
 \label{subtracted}
 \begin{center}
 \includegraphics[height=10cm]{Figure_3.eps}
-\caption{Default visualization of the HDF5-file produced by the sample changer pipeline with the \textit{silx} viewer}
+\caption{Default visualization of the HDF5-file produced by the sample changer pipeline with the \textit{silx} viewer. 
+The superimposed red curve corresponds to the BIFT modeled data.}
 \end{center}
 \end{figure}
 
