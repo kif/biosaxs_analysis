@@ -156,7 +156,7 @@ This highlights the importance of publishing the actual implementation of the al
 \subsubsection{Pair distribution function:}
 Despite the scattering curve $I(q)$ is the Fourier transform of the pair distribution function $p(r)$, the later cannot directly be obtained from an inverse Fourier transform (IFT) due to the loss of phase information and the limited amount of information in the scattering curve. 
 This ill-posed mathematical problem has not exact solution and is usually inverted with some extra constraints imposed, like the finite size of the support (defined by the maximum diameter, $Dmax$).    
-FreeSAS proposes an IFT based on the Bayesian statistics and derived from BIFT \cite{bift}, like the one found in \cite{bioxtasraw}.
+FreeSAS proposes an IFT based on the Bayesian statistics and derived from BIFT \cite{bift}, like the one found in \citeasnoun{bioxtasraw}.
 %The command-line program to perfrom and IFT is \textit{bift.py}. 
 Despite different approach, the result of \textit{bift} is similar to the \textsc{datgnom} \cite{ATSAS1} from ATSAS which uses a Tikhonov's regularization.
 The diameter found, $Dmax$, is directly comparable with the one provided by ATSAS, but the parameter $\alpha$ differs since the theory used for regularisation differs. 
@@ -226,7 +226,7 @@ The figure \ref{multiframe} presents a file produced by the \textit{multi-frame 
 There are four subsequent analysis steps:
 \begin{enumerate}
 \item Each frame is azimuthally integrated with \textit{pyFAI} \cite{pyfai_2020} to produce scattering curves;
-\item Scattering curves are compared to to assess radiation damage using the \textit{CorMap} \cite{CorMap} algorithm;
+\item Scattering curves are compared to to assess radiation damage using the \textit{CorMap} algorithm \cite{CorMap};
 \item Equivalent frames are averaged together, weighted by the beam-stop diode intensity; 
 \item The averaged frame is finally azimuthally integrated. 
 \end{enumerate}
@@ -241,8 +241,7 @@ There are four subsequent analysis steps:
 The plot of the azimuthally integrated averaged frame (stage 4) is set as the default display  when processing data in sample-changer mode.
 In HPLC-mode, the default plot represents the summed intensity as function of time, which is a fraction of the chromatogram. 
 The HDF5-file contains in addition external links to the raw frames as acquired by the detector.
-
-
+Uncertainties on pixel intensities are assumed to be Poissonian and propagated accordingly.
 %Azimuthal integration is a common reduction step for all small angle scattering experiments. 
 %The BioSAXS beamline uses \textit{pyFAI} \cite{pyfai_2020} as core of its \textit{multiframe} integration pipeline.
 %Thanks to the GPU-computing, \textit{pyFAI} is able to integrate each frame within a millisecond.
@@ -273,9 +272,9 @@ buffer files corresponding to the different acquisition of buffers, usually the 
 This produces a new HDF5 file with the subtracted data in it, such file is visualized in figure \ref{subtracted}
 and contains the results of this 8-stage pipeline: 
 \begin{enumerate}
-    \item Comparison of buffer curves using the CorMap algorithm \cite{CorMap};
+    \item Comparison of buffer curves using the \textit{CorMap} algorithm \cite{CorMap};
     \item Buffer frames are averaged together and subtracted from the sample averaged frame;
-    \item Azimuthal integration of the subtracted frame with pyFAI;
+    \item Azimuthal integration of the subtracted frame with \textit{pyFAI} \cite{pyfai_2020};
     \item Guinier analysis with the associated linear regression of $log(I) = f(q^2)$ at low $q$ as default plot;
     \item Dimensionless Kratky plot: $(q\cdot R_g)^2\cdot I/I_0 = f(q\cdot R_g)$;
     \item Porod \cite{glatter+kratky} and Rambo-Tainer invariants \cite{RamboTainerNature2013} to assess the the molecular volume and weight of the sample;
@@ -283,7 +282,7 @@ and contains the results of this 8-stage pipeline:
     \item Send reduced data to ISPyB for BioSAXS.
 \end{enumerate}
 As previously, there is a link to the source data as stage zero of the processing to ensure a perfect tracking of the experiment.
-The $p=f(r)$ plot obtained from BIFT allows to simulated the scattering curve $I=f(q)$ and should confirm the radius of gyration found at stage 3.
+The $p=f(r)$ plot obtained from BIFT allows to simulated the scattering curve $I=f(q)$ and should confirm the radius of gyration found at stage 4.
 
 \begin{figure}
 \label{subtracted}
@@ -325,7 +324,7 @@ This chromatography pipeline has six stages:
     \item Rebuild the chromatogram from partial ones provided by the \textit{multi-frame} pipeline;
     \item Perform the Singlar Value Decomposition to assess the number of components;
     \item Perform the NMF decomposition to get an idea of the scattering of the different components;
-    \item Average-out the background curves;
+    \item Select points belonging to the background and average-out those curves;
     \item Analyse each fraction with a similar pipeline to the one presented in \ref{sc-pipeline}
     \item Prepare the data and send them to ISPyB for BioSAXS.
 \end{enumerate}
@@ -343,7 +342,7 @@ First the singular value decomposition (SVD) is performed, provided by the NumPy
 This decomposes the chromatogram $I(q)$ as a serie of singular-values representing the chromatogram for every component stored in the associated singular-vector. 
 There are as many singular values/vectors pairs as time-steps acquired in the experiment but only the first ones account for actual signal.
 The first singular vector contains mainly background scattering, the following ones contains signal from the separated components and subsequent ones account only for noise. 
-The number of saved singular saved is provided in \cite{svd_threshold}.
+The number of singular values to be saved is provided by \citeasnoun{svd_threshold}.
 % The elution of the sample is usually very visible in the chromatogram associated to the second and third singular values.
 Users are often surprised by negative section in extracted singular vectors: SVD does not enforce the signal to be positive.
 
@@ -391,7 +390,7 @@ From those figures, one can estimate HPLC-mode represents 6\% of the measurement
 
 \subsection{Performances}
 
-Everything is executed on a single computer, single processor (featuring 6 cores) with an entry-level graphics card. 
+All computations are executed on a single computer, single processor (featuring 6 cores) with an entry-level graphics card. 
 During those 20 month, the \textit{dahu}-server has been started 90 times, which corresponds to the weekly restart to apply security patches and other bug-corrections. 
 Since all data-reduction occurs within the same process using threads, this demonstrates not only the reliability of the \textit{dahu}-server 
 but also of the whole pipeline including \textit{FreeSAS} analysis.
@@ -411,8 +410,8 @@ This document introduces the \textit{FreeSAS} and the \textit{dahu} software pac
 and control online data analysis at the BioSAXS beamline at the European synchrotron. 
 Those two packages are combined with others to provide complete data analysis pipelines.
 The three pipelines described in this contribution are used in production since 2020, and provide real-time feed-back of ongoing experiments to the user.
-All metadata, all parameters and all references to the source data are recorded together with the processed data into a single HDF5 files which offers 
-not only convenient storage but allows also reproducible science in the FAIR principle. 
+All metadata, all parameters and all references to the source data are recorded together with the processed data into single HDF5 files which offers 
+not only convenient storage but allows also reproducible science following the FAIR principle. 
 
 \appendix
 \section{Method}
