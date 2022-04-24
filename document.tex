@@ -154,14 +154,14 @@ It is worth mentioning that none of the three algorithms provide the exact same 
 This highlights the importance of publishing the actual implementation of the algorithms with the associated numerical parameters used in it.
   
 \subsubsection{Pair distribution function:}
-Despite the scattering curve $I(q)$ is the Fourier transform of the pair distribution function $p(r)$, the later cannot directly be obtained from an inverse Fourier transform (IFT) due to the loss of phase information and the limited amount of information in the scattering curve. 
+Although the scattering curve $I(q)$ is the Fourier transform of the pair distribution function $p(r)$, the later cannot directly be obtained from an inverse Fourier transform (IFT) due to the loss of phase information and the limited amount of information in the scattering curve. 
 This ill-posed mathematical problem has not exact solution and is usually inverted with some extra constraints imposed, like the finite size of the support (defined by the maximum diameter, $Dmax$).    
 FreeSAS proposes an IFT based on the Bayesian statistics and derived from BIFT \cite{bift}, like the one found in \citeasnoun{bioxtasraw}.
 %The command-line program to perfrom and IFT is \textit{bift.py}. 
 Despite different approach, the result of \textit{bift} is similar to the \textsc{datgnom} \cite{ATSAS1} from ATSAS which uses a Tikhonov's regularization.
 The diameter found, $Dmax$, is directly comparable with the one provided by ATSAS, but the parameter $\alpha$ differs since the theory used for regularisation differs. 
 
-\subsubsection{Equivalence of scattering curves: }
+\subsubsection{Assessment of equivalence of scattering curves: }
 To obtains the best possible signal from the sample, the capillary is exposed multiple times with a short exposure time.
 All equivalent frames are then merged to optimized the signal/noise ratio without pollution from radiation damaged data.  
 The equivalence of a couple of frames is obtained from the correlation-map (CorMap) algorithm implemented from the publication by \citeasnoun{CorMap}.
@@ -170,7 +170,7 @@ The equivalence of a couple of frames is obtained from the correlation-map (CorM
 \textit{subpycomp} \cite{BM29ODA}, a tool to rotate/flip bead models and overlay them prior to merging them. It is equivalent to the \textsc{supcomb} \cite{supcomb} tool from ATSAS. 
 
 \subsubsection{Extraction to ASCII data:} with the increased frame-rate of the new beamline, the historical 3-column text file with $q$, $I_{avg}$, $\sigma(I)$ became unpractical and has been superseded by the hierarchical-data format, HDF5 \cite{hdf5} which contains all analysed data derived from raw data.
-The \textit{extract-ascii} tool is designed to regenerate those text files and offer a compatibility with third-party tools.
+The \textit{extract-ascii} tool is designed to generate text files in the  $q$, $I_{avg}$, $\sigma(I)$ format and offer a compatibility with third-party tools.
 
 \subsection{The job-manager: \textit{dahu}}
 
