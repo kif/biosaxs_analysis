@@ -145,9 +145,9 @@ The latest release, \textit{FreeSAS} 0.9, supports Python 3.6 to 3.9.
 
 
 \subsubsection{Guinier-region fitting:}
-The first analysis performed on bioSAXS data determines the hydrodynamic radius of gyration ($R_g$) of the macromolecule and the forwards scattering value, $I_0$ \cite{guinier}.
-$R_g$ is obtained from the linear regression of $log(I) = f(q^2)$ on the proper q-range. 
-This q-range, also called the Guinier-region, comes from the Tailor expansion of the scattering curve at $q=0$.
+The first analysis performed on bioSAXS data determines the radius of gyration ($R_g$) of the solvated macromolecule and the forwards scattering intensity, $I_0$ \cite{guinier}.
+$R_g$ is obtained from the linear regression of $log(I(q)) = log(I_0)-1/3 (R_{G}q)^{2}$ on the proper q-range at small angles, called the Guinier Range.
+This approximation comes from the Tailor expansion of the scattering curve at $q=0$.
 The selection of the Guinier-region is far from being obvious due to the beam-stop shadow, aggregation effects and the upper limits depends on $R_g$ itself: $q \cdot R_g<1.3$.
 Thus multiple implementation are provided: \textit{autorg}, which derives from the implementation in BioXTAS-RAW \cite{bioxtasraw}; \textit{auto-guinier}, which searches for a consensus region rather than the best possible Guinier-region; and finally \textit{auto-gpa}, which performs a Guinier-peak-analysis \cite{gpa}. 
 The later is a quick assessment of the $R_g$ and $I_0$, sometimes less robust than the two other implementations, but suitable when many datasets are to be analyzed like in chromatography mode.
