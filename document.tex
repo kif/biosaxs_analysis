@@ -174,7 +174,7 @@ The \textit{extract-ascii} tool is designed to generate text files in the  $q$, 
 
 \subsection{The job-manager: \textit{dahu}}
 
-The role of the job manager is to ensure all the processing requested by the user interface are actually performed and that the client is warned in case of issue.
+The role of the job manager is to ensure all the processing requested by the user interface are actually performed and that the client (what do you mean by client? The requestor?) is informed in case of issues. %Only if issues arrise? Or is other information also returned?
 %This subsection is purely technical and can be skipped. 
 
 EDNA was used as workflow manager for the previous data-analysis pipeline for many protein crystallography beamlines \cite{edna} and for the BioSAXS beamline at the ESRF \cite{BM29ODA}.
@@ -195,8 +195,8 @@ Thus the code runs actually in parallel only in sections where the Global Interp
 manage the execution of the \textit{plugins} (see here-after), provide an unique identifier which gives access the status and output of the processing.
 Jobs see their input and output saved to the disk, this allow off-line reprocessing in case of issue during online data analysis.
 
-\subsubsection{Dahu-plugins} implement the processing logic, the pipeline.
-Written in simple Python and fairly independent from the \textit{dahu} framework, those plugins are often written or modified by the beamline scientist himself.
+\subsubsection{Dahu-plugins} implement the processing logic of the pipelines.
+Written in simple Python and fairly independent from the \textit{dahu} framework, those plugins are often written or modified by the beamline scientist themself.
 
 \subsubsection{Offline re-processing}
 is made possible by the \textit{dahu-reprocess} command-line tool.
