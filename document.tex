@@ -208,11 +208,11 @@ Nevertheless, to reprocess data acquired at the BioSAXS beamline, one would of c
 \label{pipeline}
 There are two main experiments performed at the BioSAXS beamline, either using the sample changer or the inline-chromatography setup (HPLC).
 Thus, two analysis pipelines were built, one for each of those experimental setups, and a third pipeline acting as a pre-processor and containing the common part related to the azimuthal integration of individual frames.
-
+% This would profit from  description of how the data is actually structured in the two acquisition modes. I got completely lost here!
 Since the Pilatus 2M detector is controlled by the LIMA software \cite{lima}, frames are saved in a HDF5 file-format \cite{hdf5} with ten or hundred frames per file (depending on the acquisition mode).
 HDF5 offers compression, faster data-access, symbolic links to datasets from one file to another ... but it is dramatically different from the former pipeline which was triggered frame per frame.
 
-The versatility of the HDF5 format allows to have a single output file for each of the processing pipeline, making backups easier.
+The versatility of the HDF5 format allows to have a single output file for all results of seach of the processing pipeline, making backups easier.
 Each pipeline registers the result of every individual processing step of the pipeline in the output HDF5 file together with the associated configuration.
 Input datasets are referenced using external links, avoiding data duplication. 
 Finally metadata describing the sample, its buffer and the configuration of the beamline are also recorded using the Nexus convention \cite{nexus}.
@@ -230,6 +230,15 @@ There are four subsequent analysis steps:
 \item Equivalent frames are averaged together, weighted by the beam-stop diode intensity; 
 \item The averaged frame is finally azimuthally integrated. 
 \end{enumerate}
+
+\begin{figure}
+     \label{multiframe_worflow}
+     \begin{center}
+     \includegraphics[height=10cm]{multiframe_pipeline.png}
+     \caption{Default visualization of the HDF5-file produced by the sample changer pipeline with the \textit{silx} viewer. 
+     The superimposed red curve corresponds to the BIFT modeled data.}
+     \end{center}
+     \end{figure}
 
 \begin{figure}
 \caption{Layout of a HDF5-file obtained from the multi-frame integration pipeline, visualized with the \textit{silx} viewer.}
@@ -283,6 +292,7 @@ and contains the results of this 8-stage pipeline:
 \end{enumerate}
 As previously, there is a link to the source data as stage zero of the processing to ensure a perfect tracking of the experiment.
 The $p=f(r)$ plot obtained from BIFT allows to simulated the scattering curve $I=f(q)$ and should confirm the radius of gyration found at stage 4.
+
 
 \begin{figure}
 \label{subtracted}
