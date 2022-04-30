@@ -222,6 +222,7 @@ This \textit{h5web} is already used in the beamline control user interface BsxCu
 
 \subsection{Multi-frame integration pipeline}
 \label{multiframe_pipeline}
+What is the input of the pipeline? 
 The figure \ref{multiframe} presents a file produced by the \textit{multi-frame integration} pipeline with the default plot consisting in the semilogatirhmic representraion of the scatteirng curve $(q)$ viewed with the \textit{silx} viewer. 
 There are four subsequent analysis steps, as illustrated in figure \ref{multiframe_worflow}:
 \begin{enumerate}
@@ -240,10 +241,8 @@ There are four subsequent analysis steps, as illustrated in figure \ref{multifra
 \begin{figure}
      \label{multiframe_worflow}
      \begin{center} 
-     \caption{Schematic of the multi-frame integration pipline. (1) Azimuthal integration of individual images (2) Comparison of 1d-curves (3) Images are averaged (4) Azimuthal integration the average image 
-}   
+     \caption{Schematic of the multi-frame integration pipline. (1) Azimuthal integration of individual images (2) Comparison of 1d-curves (3) Images are averaged (4) Azimuthal integration the average image }   
      \includegraphics{multiframe_pipeline.eps}
-
      \end{center}
 \end{figure}
 
@@ -282,19 +281,19 @@ In sample changer mode, solution containing samples are acquired alternatingly w
 The processing is triggered with integrated data from the sample (i.e. the name of the file containing the sample data after azimuthal integration) and a list of 
 buffer files corresponding to the different acquisition of buffers, usually the buffer before and the buffer after the sample acquisition. 
 This produces a new HDF5 file with the subtracted data in it, such file is visualized in figure \ref{subtracted}
-and contains the results of this 8-stage pipeline: 
+and contains the results of this 8-stage pipeline (see figure \ref{samplechanger_worflow}): 
 \begin{enumerate}
     \item Comparison of buffer curves using the \textit{CorMap} algorithm \cite{CorMap};
     \item Buffer frames are averaged together and subtracted from the sample averaged frame;
     \item Azimuthal integration of the subtracted frame with \textit{pyFAI} \cite{pyfai_2020};
-    \item Guinier analysis with the associated linear regression of $log(I) = f(q^2)$ at low $q$ as default plot;
-    \item Dimensionless Kratky plot: $(q\cdot R_g)^2\cdot I/I_0 = f(q\cdot R_g)$;
+    \item Guinier analysis with the associated linear regression of $log(I(q))$ vs. $log(I_0)-1/3 (R_{G}q)^{2}$ at low $q$ as default plot;
+    \item Dimensionless Kratky plot: $(q\cdot R_g)^2\cdot I/I_0$  vs. $q\cdot R_g$;
     \item Porod \cite{glatter+kratky} and Rambo-Tainer invariants \cite{RamboTainerNature2013} to assess the the molecular volume and weight of the sample;
-    \item Fourier inversion using the BIFT algorithm \cite{bift} provides the $p=f(r)$ plot
-    \item Send reduced data to ISPyB for BioSAXS.
+    \item Indirect inverse Fourier transform using the BIFT algorithm \cite{bift} provides the pair distribution funtion $p(r)$ vs. $r$ plot
+    \item Transfer of reduced data to ISPyB for BioSAXS.
 \end{enumerate}
-As previously, there is a link to the source data as stage zero of the processing to ensure a perfect tracking of the experiment.
-The $p=f(r)$ plot obtained from BIFT allows to simulated the scattering curve $I=f(q)$ and should confirm the radius of gyration found at stage 4.
+As in the multi-fram processing pipeline (\ref{multiframe_pipeline}), there is a link to the source data as stage zero of the processing to ensure a perfect tracking of the experiment.
+The pair distribuion function obtained from BIFT allows to cacluation of the radius of gyration in real space and should confirm the radius of gyration found at stage 4. 
 
 
 \begin{figure}
@@ -307,11 +306,20 @@ The superimposed red curve corresponds to the BIFT modeled data.}
 \end{figure}
 
 
+\begin{figure}
+     \label{samplechanger_worflow}
+     \begin{center}
+     \includegraphics{samplechanger_pipeline.eps}
+     \caption{Schematic of the sample changer pipline. (1) Comparison of buffer frames and creation of averaged buffer image (2) Subtraction of averaged buffer image from sample image (3) Azimuthal integration the backgrpund corrected image (4) SAS analysis, including Guinier analysis, BIFT,... }
+     \end{center}
+     \end{figure}
+
 %Integrated buffer data are compared with the correlation-map algorithm in order to validate that acquired buffer matches, 
 %If they don't, only the buffer acquires prior to the sample acquisition is considered
 %Averaging of the buffer signal and subtraction of the buffer from sample data are both performed on the 
 %2D frames. 
 Working on the 2D data frames allows a better preservation of weak signals and cancels-out systematic deviation from certain pixels.
+this statemern needs prrof, either by citation or by showing some statistics comparing the estimated standard deviation for same data (water? BSA?) for both the old and new pipelines.
 % The subtracted frame is then integrated using \textit{pyFAI} and the associated uncertainties propagated according to \cite{pyfai_2020}.
 
 % The subtracted SAXS curve is then analyzed with Guinier fit (all three algorithms available in FreeSAS are tested)
