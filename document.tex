@@ -395,7 +395,7 @@ The table \ref{stats} summarizes some figures collected:
     %\centering
     \begin{tabular}{|c|c|c|c|}
         \hline
-        Processing name & # calls & Frame processed & run-time \\
+        Processing pipeline & # calls & Frame processed & run-time per frame \\
         \hline
         Integrate multi-frame & 42575 & 1230k & 2.1s (1s, 10s) \\
         Subtract \& SAXS analysis & 11214 & 336k & 7.3s \\
@@ -412,7 +412,7 @@ From those figures, one can estimate HPLC-mode represents 6\% of the measurement
 
 \subsection{Performances}
 
-All computations are executed on a single computer, single processor (featuring 6 cores) with an entry-level graphics card. 
+All computations are executed on a single computer equiped wiht  single 6 core processor and an entry-level graphics card (could be sepcify this? entry level is still a braod field). 
 During those 20 month, the \textit{dahu}-server has been started 90 times, which corresponds to the weekly restart to apply security patches and other bug-corrections. 
 Since all data-reduction occurs within the same process using threads, this demonstrates not only the reliability of the \textit{dahu}-server 
 but also of the whole pipeline including \textit{FreeSAS} analysis.
