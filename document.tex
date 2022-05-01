@@ -132,7 +132,7 @@ Despite Python being an interpreted language, FreeSAS is performance oriented an
 \textit{FreeSAS} has been made available and packaged independently from \textit{dahu} (the online analysis tools) so that scientists can reprocess their data and compare their results with those of other analysis software. 
 The latest release, \textit{FreeSAS} 0.9, supports Python 3.6 to 3.9.
 
-\subsubsection{SAS plotting:} The \textit{freesas} tool provides a way to plot a semi-logarithmic representation the SAS curve: $I(q)$, where $q = 4\pi sin(2\theta/2)/\lambda$ is the amplitude of the scattering vector and $I(q)$ the recorded intensity at a given $q$, along side some basic analyses which are described in the next sections.
+\subsubsection{SAS plotting:} The \textit{freesas} tool provides a way to plot a semi-logarithmic representaion the SAS curve: $I(q)$, where $q = 4\pi sin(2\theta/2)/\lambda$ is the amplitude of the scattering vector and $I(q)$ the recorded intensity at a given $q$, along side some basic analyses which are described in the next sections.
 
 
 \begin{figure}
@@ -150,7 +150,7 @@ Based on the Tailor expansion of the scattering curve at $q=0$, $R_g$ is obtaine
 The selection of the Guinier-region is far from being obvious due to the beam-stop shadow, aggregation effects, and its upper limit depends on $R_g$ itself: $q \cdot R_g<1.3$.
 Thus multiple implementation are provided: \textit{autorg}, which derives from the implementation in BioXTAS-RAW \cite{bioxtasraw}; \textit{auto-guinier}, which searches for a consensus region rather than the best possible Guinier-region; and finally \textit{auto-gpa}, which performs a Guinier-peak-analysis \cite{gpa}. 
 The later is a quick assessment of the $R_g$ and $I_0$, sometimes less robust than the two other implementations, but suitable when many datasets are to be analyzed like in chromatography mode.
-It is worth mentioning that none of the three algorithms provide the exact same results as the original \textsc{autorg} \cite{ATSAS2} version from ATSAS. 
+It is worth mentioning that none of the three algorithms are provid the exact same results as the original \textsc{autorg} \cite{ATSAS2} version from ATSAS. 
 This highlights the importance of publishing the actual implementation of the algorithms with the associated numerical parameters used in it.
   
 \subsubsection{Pair distribution function:}
@@ -174,7 +174,7 @@ The \textit{extract-ascii} tool is designed to generate text files in the  $q$, 
 
 \subsection{The job-manager: \textit{dahu}}
 
-The role of the job manager is to ensure all the processing requested by the user interface (the client) are actually performed and that the clients gets warned in case of error and informed when the process ends normally. 
+The role of the job manager is to ensure all the processing requested by the user interface are actually performed and that the client (what do you mean by client? The requestor?) is informed in case of issues. %Only if issues arrise? Or is other information also returned?
 %This subsection is purely technical and can be skipped. 
 
 EDNA was used as workflow manager for the previous data-analysis pipeline for many protein crystallography beamlines \cite{edna} and for the BioSAXS beamline at the ESRF \cite{BM29ODA}.
@@ -291,7 +291,7 @@ Uncertainties on pixel intensities are assumed to be Poissonian and propagated a
 \label{sc-pipeline}
 In sample changer mode, solution containing samples are acquired alternatingly with pure buffer solutions.
 The processing is triggered with integrated data from the sample (i.e. the name of the file containing the sample data after azimuthal integration) and a list of 
-buffer files corresponding to the different acquisition of buffers, usually the buffer before and the buffer after the sample acquisition. 
+buffer files corresponding to the different acquisition of buffers, usually the buffer before and the buffer after the sample acquisition. (what is the data rate here?)
 This produces a new HDF5 file with the subtracted data in it, such file is visualized in figure \ref{subtracted}
 and contains the results of this 8-stage pipeline (see figure \ref{samplechanger_worflow}): 
 \begin{enumerate}
