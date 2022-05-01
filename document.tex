@@ -108,7 +108,7 @@ The BioSAXS beam-line from the European synchrotron \cite{BM29paper} had an auto
 While the outcome of the processing was very appreciated by beamline users, the system was already close to the maximal throughput possible in terms of performances. 
 The new EBS source \cite{EBS} of the ESRF not only provides a higher brilliance, but also new wiggler sources for the former bending-magnet beamlines which triggered the re-build and the upgrade of most of them. 
 The BioSAXS beamline (BM29) has been rebuilt in 2019 and features a  2-pole wiggler, a new flight-tube with an upgraded  Pilatus 2M detector (planned to be) mounted in vacuum. 
-This has lead to an increase of data by a factor five (What does this mean? GB per day? Frames per day? samples perday?), mainly due to the new detector. 
+This has lead to an increase of data by a factor five (What does this mean? GB per day? Frames per day? samples perday?), mainly due to the new detector.  
 
 This paper is divided in two main parts, starting with a presentation of the tools used for 
 processing SAS data (\textit{FreeSAS}) and for assembling pipelines (\textit{dahu}).
@@ -222,7 +222,7 @@ This \textit{h5web} is already used in the beamline control user interface BsxCu
 
 \subsection{Multi-frame integration pipeline}
 \label{multiframe_pipeline}
-What is the input of the pipeline? 
+What is the input of the pipeline? What is the data rate?
 The figure \ref{multiframe} presents a file produced by the \textit{multi-frame integration} pipeline with the default plot consisting in the semilogatirhmic representraion of the scatteirng curve $(q)$ viewed with the \textit{silx} viewer. 
 There are four subsequent analysis steps, as illustrated in figure \ref{multiframe_worflow}:
 \begin{enumerate}
@@ -279,7 +279,7 @@ Uncertainties on pixel intensities are assumed to be Poissonian and propagated a
 \label{sc-pipeline}
 In sample changer mode, solution containing samples are acquired alternatingly with pure buffer solutions.
 The processing is triggered with integrated data from the sample (i.e. the name of the file containing the sample data after azimuthal integration) and a list of 
-buffer files corresponding to the different acquisition of buffers, usually the buffer before and the buffer after the sample acquisition. 
+buffer files corresponding to the different acquisition of buffers, usually the buffer before and the buffer after the sample acquisition. (what is the data rate here?)
 This produces a new HDF5 file with the subtracted data in it, such file is visualized in figure \ref{subtracted}
 and contains the results of this 8-stage pipeline (see figure \ref{samplechanger_worflow}): 
 \begin{enumerate}
