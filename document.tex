@@ -335,18 +335,19 @@ The final stage of this pipeline is to register those results into the ISPyB for
 The same data are shared with the BSXCube control software via a memcached key-value database for instant feed-back.
 
 \subsection{SEC-SAXS pipeline}
-Online purification of the sample to reduce the effect of oligomerization has become a \textit{de-facto} procedure
-since it was introduced in 2012 \cite{SECPaper2012} and accounts now for two third of all measurements performed at the beamline.
+I have to admit that I ma quite lost in this section. I suspect the reason is that I do not understnad how the input data looks like? Are there 10 partial chromatograms per run? 100? 1000? that makes quite a difference, doesn't it? 
+Online purification of the sample to reduce the effect of oligomerization has become a standard procedure
+since it was introduced to BM29 in 2012 \cite{SECPaper2012} and accounts now for two third of all measurements performed at the beamline.
 
-The input for this pipeline a list of HDF5-files with partial chromatograms integrated by the multi-frame pipeline presented in section \ref{multiframe_pipeline}.
+The input for this pipeline a list of HDF5-files with partial chromatograms integrated by the multi-frame pipeline presented in section \ref{multiframe_pipeline}. How large is such ar partial chromatogram? How many are there? How is their size decided?
 The first step is to re-build the complete chromatogram, taking into account the possibility for empty sections (due to missing input files), and is presented in figures \ref{hplc}.
 This chromatography pipeline has six stages:
 \begin{enumerate}
-    \item Rebuild the chromatogram from partial ones provided by the \textit{multi-frame} pipeline;
-    \item Perform the Singlar Value Decomposition to assess the number of components;
-    \item Perform the NMF decomposition to get an idea of the scattering of the different components;
-    \item Select points belonging to the background and average-out those curves;
-    \item Analyse each fraction with a similar pipeline to the one presented in \ref{sc-pipeline}
+    \item Rebuild the chromatogram from partial ones provided by the \textit{multi-frame} pipeline; TO obtain what? All individual frames? All averages frames?
+    \item Perform the Singlar Value Decomposition to assess the number of components; on the completety, non-background corrected chromatogram?
+    \item Perform the NMF decomposition to get an idea of the scattering of the different components; 
+    \item Select points belonging to the background and average-out those curves; If understand the following correclty, it is simply the first 30 \%? is there are reason this is not dome before SVD and NMF
+    \item Analyse each fraction with a similar pipeline to the one presented in \ref{sc-pipeline} Where do those fractions  come from?
     \item Prepare the data and send them to ISPyB for BioSAXS.
 \end{enumerate}
 
