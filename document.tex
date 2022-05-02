@@ -132,7 +132,7 @@ Despite Python being an interpreted language, FreeSAS is performance oriented an
 \textit{FreeSAS} has been made available and packaged independently from \textit{dahu} (the online analysis tools) so that scientists can reprocess their data and compare their results with those of other analysis software. 
 The latest release, \textit{FreeSAS} 0.9, supports Python 3.6 to 3.9.
 
-\subsubsection{SAS plotting:} The \textit{freesas} tool provides a way to plot a semi-logarithmic representaion the SAS curve: $I(q)$, where $q = 4\pi sin(2\theta/2)/\lambda$ is the amplitude of the scattering vector and $I(q)$ the recorded intensity at a given $q$, along side some basic analyses which are described in the next sections.
+\subsubsection{SAS plotting:} The \textit{freesas} tool provides a way to plot a semi-logarithmic representation the SAS curve: $I(q)$, where $q = 4\pi sin(2\theta/2)/\lambda$ is the amplitude of the scattering vector and $I(q)$ the recorded intensity at a given $q$, along side some basic analyses which are described in the next sections.
 
 
 \begin{figure}
@@ -150,7 +150,7 @@ Based on the Tailor expansion of the scattering curve at $q=0$, $R_g$ is obtaine
 The selection of the Guinier-region is far from being obvious due to the beam-stop shadow, aggregation effects, and its upper limit depends on $R_g$ itself: $q \cdot R_g<1.3$.
 Thus multiple implementation are provided: \textit{autorg}, which derives from the implementation in BioXTAS-RAW \cite{bioxtasraw}; \textit{auto-guinier}, which searches for a consensus region rather than the best possible Guinier-region; and finally \textit{auto-gpa}, which performs a Guinier-peak-analysis \cite{gpa}. 
 The later is a quick assessment of the $R_g$ and $I_0$, sometimes less robust than the two other implementations, but suitable when many datasets are to be analyzed like in chromatography mode.
-It is worth mentioning that none of the three algorithms are provid the exact same results as the original \textsc{autorg} \cite{ATSAS2} version from ATSAS. 
+It is worth mentioning that none of the three algorithms provide the exact same results as the original \textsc{autorg} \cite{ATSAS2} version from ATSAS. 
 This highlights the importance of publishing the actual implementation of the algorithms with the associated numerical parameters used in it.
   
 \subsubsection{Pair distribution function:}
