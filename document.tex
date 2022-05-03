@@ -211,7 +211,7 @@ Thus, two analysis pipelines were built, one for each of those experimental mode
 The common part, mainly azimuthal integration of individual frames, got integrated into a pre-processing pipeline called \textit{integrate muti-frame}.
 %This would profit from  description of how the data is actually structured in the two acquisition modes. I got completely lost here!
 
-Since the Pilatus 2M detector is controlled by the LIMA software \cite{lima}, frames are saved in a HDF5 file-format \cite{hdf5} with ten or hundred frames per file (depending on the acquisition mode, figure \ref{lima}).
+Since the Pilatus 2M detector is controlled by the LIMA software \cite{lima}, raw images are saved in a HDF5 file-format \cite{hdf5} with ten or hundred frames per file (depending on the acquisition mode, figure \ref{lima}).
 HDF5 offers compression, faster data-access, symbolic links to datasets from one file to another ... but it is dramatically different from the former pipeline which was triggered frame per frame.
 
 \begin{figure}
@@ -233,12 +233,13 @@ Each processing pipeline defines a default plot which tries to summarize the exp
 
 \subsection{Multi-frame integration pipeline}
 \label{multiframe_pipeline}
-What is the input of the pipeline? 
-The figure \ref{multiframe} presents a file produced by the \textit{multi-frame integration} pipeline with the default plot consisting in the semi-logarithmic representation of the scattering curve $(q)$ viewed with the \textit{silx} viewer. 
-There are four subsequent analysis steps, as illustrated in figure \ref{multiframe_worflow}:
+The multiframe integration pipeline is triggered with the name of one LIMA file (containing several frames) and all additional metadata describing the sample and the experiment.
+All other processing parameters are sent in the same way, regardless if they are read from the user-interface or collected by BLISS, the sequencer.
+The figure \ref{multiframe} presents a file produced by this processing pipeline with the default plot consisting in the semi-logarithmic representation of the scattering curve $(q)$ viewed with \textit{silx}.
+This pipeline is built of four subsequent analysis steps, as illustrated in figure \ref{multiframe_worflow}:
 \begin{enumerate}
-\item Each recorded image is azimuthally integrated with \textit{pyFAI} \cite{pyfai_2020} to produce scattering curves, using the beam geomtry and X-ray energy from ???
-\item Scattering curves are compared to to assess radiation damage using the \textit{CorMap} algorithm \cite{CorMap}; Which \textit{p} value do we use? Can users change it (they could in the old pipeline)
+\item Each recorded image is azimuthally integrated with \textit{pyFAI} \cite{pyfai_2020} to produce scattering curves;
+\item Scattering curves are compared to to assess radiation damage using the \textit{CorMap} algorithm \cite{CorMap};
 \item Equivalent images are averaged together, weighted by the beam-stop diode intensity; 
 \item The averaged frame is finally azimuthally integrated. 
 \end{enumerate}
