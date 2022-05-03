@@ -294,51 +294,55 @@ The HDF5-file additionally includes external links to the raw frames as acquired
 \subsection{Sample-changer pipeline}
 \label{sc-pipeline}
 In sample changer mode, solution containing samples are acquired alternatingly with pure buffer solutions.
-In this mode, the thoughput of the beamline is limited by the pipetting system of the robot and the delay for cleaning the exposure chamber.  
+The thoughput of the beamline is limited by the pipetting system of the robot and the delay for cleaning the exposure chamber.  
 The processing is triggered with integrated data from the sample (i.e. the name of the file containing the sample data after azimuthal integration) and a list of 
 buffer files corresponding to the different acquisition of buffers, usually the buffer before and the buffer after the sample acquisition.
-Sample-changer pipeline produces a new HDF5 file with the subtracted data in it, such file is visualized in figure \ref{subtracted}
-and contains the results of this 8-stage pipeline (see figure \ref{samplechanger_worflow}): 
+
+\begin{figure}
+\label{samplechanger_worflow}
+\includegraphics*[width=12cm]{samplechanger_pipeline.eps}
+\caption{Schematic of the sample-changer pipline: 
+1. Comparison of buffer frames image;
+2. Subtraction of averaged buffer image from sample image;
+3. Azimuthal integration the background subtrated image;
+4. and subsequent: SAS analysis, including Guinier, Kratky and BIFT analysis.}
+\end{figure}
+
+Sample-changer pipeline is schematized in figure \ref{samplechanger_worflow} and produces a new HDF5 file with the subtracted data in it, such file is visualized in figure \ref{subtracted} and contains the results of this 8-stage pipeline: 
 \begin{enumerate}
     \item Comparison of buffer curves using the \textit{CorMap} algorithm \cite{CorMap};
-    \item Buffer frames are averaged together and subtracted from the sample averaged frame;
+    \item Buffer frames are averaged together and subtracted from the sample averaged frame (i.e. still in 2D);
     \item Azimuthal integration of the subtracted frame with \textit{pyFAI} \cite{pyfai_2020};
     \item Guinier analysis with the associated linear regression of $log(I(q))$ vs. $log(I_0)-1/3 (R_{G}q)^{2}$ at low $q$ as default plot;
     \item Dimensionless Kratky plot: $(q\cdot R_g)^2\cdot I/I_0$  vs. $q\cdot R_g$;
-    \item Porod \cite{glatter+kratky} and Rambo-Tainer invariants \cite{RamboTainerNature2013} to assess the the molecular volume and weight of the sample;
-    \item Indirect inverse Fourier transform using the BIFT algorithm \cite{bift} provides the pair distribution funtion $p(r)$ vs. $r$ plot
-    \item Transfer of reduced data to ISPyB for BioSAXS.
+    \item Porod \cite{glatter+kratky} and Rambo-Tainer invariants \cite{RamboTainerNature2013} to assess the the molecular volume and molecular mass of the sample;
+    \item Indirect inverse Fourier transform using the BIFT algorithm \cite{bift} provides the pair distribution funtion $p(r)$ plot;
+    \item Transfer of reduced data to ISPyB for BioSAXS (compatibility layer with legacy ISPyB).
 \end{enumerate}
-As in the multi-fram processing pipeline (\ref{multiframe_pipeline}), there is a link to the source data as stage zero of the processing to ensure a perfect tracking of the experiment.
-The pair distribuion function obtained from BIFT allows to cacluation of the radius of gyration in real space and should confirm the radius of gyration found at stage 4. 
-
+As in the multi-frame processing pipeline (\ref{multiframe_pipeline}), there is a link to the source data as stage zero of the processing to ensure a perfect tracking of the experiment.
+The pair distribuion function obtained from BIFT (stage 7) allows to calcluation of the radius of gyration in real space and should confirm the radius of gyration found from Guinier fit (stage 4). 
 
 \begin{figure}
 \label{subtracted}
-\begin{center}
-\includegraphics[height=10cm]{Figure_3.eps}
+\includegraphics*[width=12cm]{subtracted.eps}
 \caption{Default visualization of the HDF5-file produced by the sample changer pipeline with the \textit{silx} viewer. 
 The superimposed red curve corresponds to the BIFT modeled data.}
-\end{center}
 \end{figure}
 
 
-\begin{figure}
-     \label{samplechanger_worflow}
-     \begin{center}
-     \includegraphics{samplechanger_pipeline.eps}
-     \caption{Schematic of the sample changer pipline. (1) Comparison of buffer frames and creation of averaged buffer image (2) Subtraction of averaged buffer image from sample image (3) Azimuthal integration the backgrpund corrected image (4) SAS analysis, including Guinier analysis, BIFT,... }
-     \end{center}
-     \end{figure}
 
 %Integrated buffer data are compared with the correlation-map algorithm in order to validate that acquired buffer matches, 
 %If they don't, only the buffer acquires prior to the sample acquisition is considered
 %Averaging of the buffer signal and subtraction of the buffer from sample data are both performed on the 
 %2D frames. 
-Working on the 2D data frames allows a better preservation of weak signals and cancels-out systematic deviation from certain pixels.
-!! 
-this statemern needs prrof, either by citation or by showing some statistics comparing the estimated standard deviation for same data (water? BSA?) for both the old and new pipelines.
-!!
+It is worth mentionning that the subtraction is based on the 2D frames and not on integrated curves since time average and azimuthal integration are not (strictly) commutative.
+One would expect that working on 2D data allows a better preservation of weak signals and better cancels-out systematic deviation from poorly-behaving pixels.
+The mathematical demonstration can be found in appendix \ref{rational}.
+
+%Working on the 2D data frames allows a better preservation of weak signals and cancels-out systematic deviation from certain pixels.
+%!! 
+%this statemern needs prrof, either by citation or by showing some statistics comparing the estimated standard deviation for same data (water? BSA?) for both the old and new pipelines.
+%!!
 % The subtracted frame is then integrated using \textit{pyFAI} and the associated uncertainties propagated according to \cite{pyfai_2020}.
 
 % The subtracted SAXS curve is then analyzed with Guinier fit (all three algorithms available in FreeSAS are tested)
@@ -354,11 +358,13 @@ The final stage of this pipeline is to register those results into the ISPyB for
 The same data are shared with the BSXCube control software via a memcached key-value database for instant feed-back.
 
 \subsection{SEC-SAXS pipeline}
-I have to admit that I ma quite lost in this section. I suspect the reason is that I do not understnad how the input data looks like? Are there 10 partial chromatograms per run? 100? 1000? that makes quite a difference, doesn't it? 
+%I have to admit that I ma quite lost in this section. I suspect the reason is that I do not understnad how the input data looks like? Are there 10 partial chromatograms per run? 100? 1000? that makes quite a difference, doesn't it? 
 Online purification of the sample to reduce the effect of oligomerization has become a standard procedure
 since it was introduced to BM29 in 2012 \cite{SECPaper2012} and accounts now for two third of all measurements performed at the beamline.
-
-The input for this pipeline a list of HDF5-files with partial chromatograms integrated by the multi-frame pipeline presented in section \ref{multiframe_pipeline}. How large is such ar partial chromatogram? How many are there? How is their size decided?
+In this mode, a typical acquisition consists of one thousand frames acquired at one frame per second.
+Those data are saved as ten files containing each one hundreed frames.
+The input for this pipeline a list of HDF5-files with partial chromatograms integrated by the \textit{multi-frame} pipeline presented in section \ref{multiframe_pipeline}. 
+%How large is such ar partial chromatogram? How many are there? How is their size decided?
 The first step is to re-build the complete chromatogram, taking into account the possibility for empty sections (due to missing input files), and is presented in figures \ref{hplc}.
 This chromatography pipeline has six stages:
 \begin{enumerate}
@@ -457,7 +463,23 @@ not only convenient storage but allows also reproducible science following the F
 \appendix
 \section{Method}
 
-All figures were obtained from test-samples used at the beamline: Bovine serum albumin (BSA) in solution a 5mg/mL in a HEPES buffer.
+All figures were obtained from test-samples used at the beamline: Bovine Serum Albumin (BSA) in solution at 5 mg/mL in a HEPES buffer.
+
+\section{Rationnal for working with raw data rather than integrated curves}
+\label{rational}
+The \textit{multiframe} and \textit{subtraction} pipelines are performing signal averaging and subtraction on 2D images rather than on azimuthally integrated curves.
+
+TODO
+
+\subsection{Limitations and future improvements}
+In sample-changer mode, each processing handles only few dozens of images at a time, thus all data can easily be held in the memory of any computer.
+In HPLC mode, where serveral thousands of frames are acquired during a single measurement, the same technique could not be used without replacing the computer with some high-end server with lots of memory.
+This is why the HPLC pipeline still averages integrated curves even if it not (strictly) correct. 
+ 
+It has been demonstrated previsouly that the averaging of frame serie was not commutative with azimuthal integration.
+Nevertheless, means and uncertainties can be obtained from partial datasets \cite{variance2018}.   
+In pyFAI, azimuthal integration is performed with ratio of sums of signals and sums of normalizations \cite{pyfai_2020}.
+This issue of the memory consumption could be alleviated by saving not only the averaged signal but also the sum of signals and the sum of normalizations.      
 
 \ack{Acknowledgements:}
 The authors wish to thank Guillaume Bonamis for his former contribution to the FreeSAS library and Jesse Hopkins from APS for the fruitful discussion and the the sharing of the code from BioXTAS-RAW.

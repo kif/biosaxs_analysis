@@ -1372,3 +1372,34 @@ doi = {10.1038/nmeth.4581}
   year={1982},
   publisher={Blackwell Science}
 }
+@inproceedings{variance2018,
+author = {Schubert, Erich and Gertz, Michael},
+title = {Numerically Stable Parallel Computation of (Co-)Variance},
+year = {2018},
+isbn = {9781450365055},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+url = {https://doi.org/10.1145/3221269.3223036},
+doi = {10.1145/3221269.3223036},
+abstract = {With the advent of big data, we see an increasing interest in computing correlations
+in huge data sets with both many instances and many variables. Essential descriptive
+statistics such as the variance, standard deviation, covariance, and correlation can
+suffer from a numerical instability known as "catastrophic cancellation" that can
+lead to problems when naively computing these statistics with a popular textbook equation.
+While this instability has been discussed in the literature already 50 years ago,
+we found that even today, some high-profile tools still employ the instable version.In
+this paper, we study a popular incremental technique originally proposed by Welford,
+which we extend to weighted covariance and correlation. We also discuss strategies
+for further improving numerical precision, how to compute such statistics online on
+a data stream, with exponential aging, with missing data, and a batch parallelization
+for both high performance and numerical precision.We demonstrate when the numerical
+instability arises, and the performance of different approaches under these conditions.
+We showcase applications from the classic computation of variance as well as advanced
+applications such as stock market analysis with exponentially weighted moving models
+and Gaussian mixture modeling for cluster analysis that all benefit from this approach.},
+booktitle = {Proceedings of the 30th International Conference on Scientific and Statistical Database Management},
+articleno = {10},
+numpages = {12},
+location = {Bozen-Bolzano, Italy},
+series = {SSDBM '18}
+}
