@@ -226,7 +226,7 @@ LIMA files (figure \ref{lima}) contain no metadata beside the camera configurati
 Thus all sample and experiment description (geometry, mask, \ldots), beam-stop diod intensities and other processing parameters have to be provided by the experiment sequencer, BLISS, as part of the job description when triggering the process.
 
 The versatility of the HDF5 format allows to have one single output file for all results produced by a processing pipeline, making backups easier.
-Each pipeline registers the result of every individual processing step of the pipeline in the output HDF5 file (as HDF5-groups),together with the configuration associated with the processing.
+Each pipeline registers the result of every individual processing step of the pipeline in the output HDF5 file (as HDF5-groups), together with the configuration associated with the processing.
 Input datasets are referenced using external links, which avoids data duplication while keeping tracability. 
 Finally metadata describing the sample, its buffer and the configuration of the beamline are also recorded using the Nexus convention \cite{nexus}.
 Each processing pipeline defines a default plot which tries to summarize the experimental result to the user.
