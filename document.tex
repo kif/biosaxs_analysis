@@ -84,8 +84,8 @@ Detailed presentation of the automatic data analysis pipelines for the BioSAXS b
 \begin{abstract}
 The second phase of the ESRF upgrade program did not only provide a new storage ring (EBS), it also allowed to refurbish several beamlines, including the BioSAXS  BM29, which got a larger detector in a new flight tube.
 To cope with the resulting increased data-flux, analysis software neede to be rewritten to continue to ensure real-time processing.
-This article describes \textit{FreeSAS}, an open-source collection of various SAXS analysis algorithms needed to reduce BioSAXS data, and (textit{dahu}, the tool used to interface data-analysis with beamline control. 
-It further presents the data processinf pipelines for the different data acquistions modes of the beamline, using either a sample-changer for individual homogenous samples or an inline size-exclusion chromatography setup.
+This article describes \textit{FreeSAS}, an open-source collection of various SAXS analysis algorithms needed to reduce BioSAXS data, and \textit{dahu}, the tool used to interface data-analysis with beamline control. 
+It further presents the data processing pipelines for the different data acquistions modes of the beamline, using either a sample-changer for individual homogenous samples or an inline size-exclusion chromatography setup.
 \end{abstract}
 
 
@@ -108,7 +108,7 @@ The BioSAXS beam-line from the European synchrotron \cite{BM29paper} had an auto
 While the outcome of the processing was very appreciated by beamline users, the system was already close to the maximal throughput possible in terms of performances. 
 The new EBS source \cite{EBS} of the ESRF not only provides a higher brilliance, but also new wiggler sources for the former bending-magnet beamlines which triggered the re-build and the upgrade of most of them. 
 The BioSAXS beamline (BM29) has been rebuilt in 2019 and features a  2-pole wiggler, a new flight-tube with an upgraded  Pilatus 2M detector (planned to be) mounted in vacuum. 
-This has lead to an increase of data by a factor five (What does this mean? GB per day? Frames per day? samples perday?), mainly due to the new detector.  
+This has lead to a substantial increase of data-rate; mainly due to the new detector, twice larger than the former one. 
 
 This paper is divided in two main parts, starting with a presentation of the tools used for 
 processing SAS data (\textit{FreeSAS}) and for assembling pipelines (\textit{dahu}).
@@ -207,52 +207,68 @@ Nevertheless, to reprocess data acquired at the BioSAXS beamline, one would of c
 \section{Data analysis pipelines}
 \label{pipeline}
 There are two main experiments performed at the BioSAXS beamline, either using the sample changer or the inline-chromatography setup (HPLC).
-Thus, two analysis pipelines were built, one for each of those experimental setups, and a third pipeline acting as a pre-processor and containing the common part related to the azimuthal integration of individual frames.
-This would profit from  description of how the data is actually structured in the two acquisition modes. I got completely lost here!
-Since the Pilatus 2M detector is controlled by the LIMA software \cite{lima}, frames are saved in a HDF5 file-format \cite{hdf5} with ten or hundred frames per file (depending on the acquisition mode).
+Thus, two analysis pipelines were built, one for each of those experimental mode.
+The common part, mainly azimuthal integration of individual frames, got integrated into a pre-processing pipeline called \textit{integrate muti-frame}.
+%This would profit from  description of how the data is actually structured in the two acquisition modes. I got completely lost here!
+
+Since the Pilatus 2M detector is controlled by the LIMA software \cite{lima}, raw images are saved in a HDF5 file-format \cite{hdf5} with ten or hundred frames per file (depending on the acquisition mode, figure \ref{lima}).
 HDF5 offers compression, faster data-access, symbolic links to datasets from one file to another ... but it is dramatically different from the former pipeline which was triggered frame per frame.
 
-The versatility of the HDF5 format allows to have a single output file for all results of seach of the processing pipeline, making backups easier.
-Each pipeline registers the result of every individual processing step of the pipeline in the output HDF5 file together with the associated configuration.
-Input datasets are referenced using external links, avoiding data duplication. 
-Finally metadata describing the sample, its buffer and the configuration of the beamline are also recorded using the Nexus convention \cite{nexus}.
-Each processing pipeline defines a default plot which tries to summarize the experimental result to the user.
+\begin{figure}
+     \caption{Layout of a raw image HDF5-file produced by the LIMA acquisition software, visualized with the \textit{silx} viewer.}
+     \includegraphics*[width=12cm]{lima.eps}
+     \label{lima}
+\end{figure}
+
 ESRF provides several tools to visualize those HDF5 files like \textit{silx view} \cite{silx} which is a graphical user interface based on Qt \cite{pyqt} or the web-viewer \textit{h5web} \cite{h5web} to visualize those files inside a web-browser.
 This \textit{h5web} is already used in the beamline control user interface BsxCuBE3 \cite{bm29_2022} and will be used in the new ISPyB interface (under development).
+LIMA files (figure \ref{lima}) contain no metadata beside the camera configuration.
+Thus all sample and experiment description (geometry, mask, \ldots), beam-stop diode intensities and other processing parameters have to be provided by the experiment sequencer, BLISS, as part of the job description when triggering the process.
+
+The versatility of the HDF5 format allows to have one single output file for all results produced by a processing pipeline, making backups easier.
+Each pipeline registers the result of every individual processing step of the pipeline in the output HDF5 file (as HDF5-groups), together with the configuration associated with the processing.
+Input datasets are referenced using external links, which avoids data duplication while keeping tracability. 
+Finally metadata describing the sample, its buffer and the configuration of the beamline are also recorded using the Nexus convention \cite{nexus}.
+Each processing pipeline defines a default plot which tries to summarize the experimental result to the user.
 
 \subsection{Multi-frame integration pipeline}
 \label{multiframe_pipeline}
-What is the input of the pipeline? What is the data rate?
-The figure \ref{multiframe} presents a file produced by the \textit{multi-frame integration} pipeline with the default plot consisting in the semilogatirhmic representraion of the scatteirng curve $(q)$ viewed with the \textit{silx} viewer. 
-There are four subsequent analysis steps, as illustrated in figure \ref{multiframe_worflow}:
-\begin{enumerate}
-\item Each recorded image is azimuthally integrated with \textit{pyFAI} \cite{pyfai_2020} to produce scattering curves, using the beam geomtry and X-ray energy from ???
-\item Scattering curves are compared to to assess radiation damage using the \textit{CorMap} algorithm \cite{CorMap}; Which \textit{p} value do we use? Can users change it (they could in the old pipeline)
-\item Equivalent images are averaged together, weighted by the beam-stop diode intensity; 
-\item The averaged frame is finally azimuthally integrated. 
-\end{enumerate}
-
-\begin{figure}
-     \caption{Layout of a HDF5-file obtained from the multi-frame integration pipeline, visualized with the \textit{silx} viewer.}
-     \includegraphics*[width=12cm]{Figure_2.eps}
-     \label{multiframe}
-     \end{figure}
+The multiframe integration pipeline is triggered with the name of one LIMA file (containing several frames) and all additional metadata describing the sample and the experiment.
+All other processing parameters are sent in the same way, regardless if they are read from the user-interface or collected by BLISS.
 
 \begin{figure}
      \label{multiframe_worflow}
      \begin{center} 
-     \caption{Schematic of the multi-frame integration pipline. (1) Azimuthal integration of individual images (2) Comparison of 1d-curves (3) Images are averaged (4) Azimuthal integration the average image }   
-     \includegraphics{multiframe_pipeline.eps}
+     \caption{Schematic of the multi-frame integration pipline: 
+     1. azimuthal integration of individual frames; 
+     2. comparison of 1d-curves;
+     3. equvalent frames are averaged;
+     4. azimuthal integration if the averaged image.}
+     \includegraphics*[width=12cm]{multiframe_pipeline.eps}
      \end{center}
 \end{figure}
 
+The figure \ref{multiframe} presents a file produced by this processing pipeline with the default plot consisting in the semi-logarithmic representation of the scattering curve $I(q)$ viewed with \textit{silx}.
+This pipeline is built of four subsequent analysis steps, as illustrated in figure \ref{multiframe_worflow}:
+\begin{enumerate}
+\item Each recorded image is azimuthally integrated with \textit{pyFAI} \cite{pyfai_2020} to produce one scattering curves per frame;
+\item Scattering curves are compared to to assess radiation damage using the \textit{CorMap} algorithm \cite{CorMap}, pairs of curves are compared to two thresholds to assess their equivalence, depending if frames are adjacent or not;
+\item Equivalent images are averaged pixel-wise, weighted by the beam-stop diode intensity; variance is assessed using Poisson law;
+\item The averaged frame is finally azimuthally integrated and uncertainties propagated accordingly. 
+\end{enumerate}
 
+\begin{figure}
+     \caption{Layout of a HDF5-file obtained from the multi-frame integration pipeline, visualized with the \textit{silx} viewer.
+     On the left-hand side, one can recognize in the HDF5-tree the structure of the pipeline described figure \ref{multiframe_worflow}.
+     The right-hand side presents the scattering curve of BSA before subtraction of background signal.}
+     \includegraphics*[width=12cm]{multiframe.eps}
+     \label{multiframe}
+\end{figure}
 
-
-The plot of the azimuthally integrated averaged frame (stage 4) is set as the default display  when processing data in sample-changer mode.
-In HPLC-mode, the default plot represents the summed intensity as function of time, which is a fraction of the chromatogram. 
-The HDF5-file additionally includes external links to the raw frames as acquired by the detector.
-Uncertainties on pixel intensities are assumed to be Poissonian and propagated accordingly.
+The plot of the azimuthally integrated averaged frame (at stage 4) is set as the default display  when processing data in sample-changer mode.
+In HPLC-mode, the default plot represents the summed intensity as function of time, which is a fraction of the complete chromatogram. 
+The HDF5-file additionally includes external links to the raw frames as acquired by the detector (stage 0).
+%Uncertainties on pixel intensities are assumed to be Poissonian and propagated accordingly.
 %Azimuthal integration is a common reduction step for all small angle scattering experiments. 
 %The BioSAXS beamline uses \textit{pyFAI} \cite{pyfai_2020} as core of its \textit{multiframe} integration pipeline.
 %Thanks to the GPU-computing, \textit{pyFAI} is able to integrate each frame within a millisecond.
@@ -278,9 +294,10 @@ Uncertainties on pixel intensities are assumed to be Poissonian and propagated a
 \subsection{Sample-changer pipeline}
 \label{sc-pipeline}
 In sample changer mode, solution containing samples are acquired alternatingly with pure buffer solutions.
+In this mode, the thoughput of the beamline is limited by the pipetting system of the robot and the delay for cleaning the exposure chamber.  
 The processing is triggered with integrated data from the sample (i.e. the name of the file containing the sample data after azimuthal integration) and a list of 
-buffer files corresponding to the different acquisition of buffers, usually the buffer before and the buffer after the sample acquisition. (what is the data rate here?)
-This produces a new HDF5 file with the subtracted data in it, such file is visualized in figure \ref{subtracted}
+buffer files corresponding to the different acquisition of buffers, usually the buffer before and the buffer after the sample acquisition.
+Sample-changer pipeline produces a new HDF5 file with the subtracted data in it, such file is visualized in figure \ref{subtracted}
 and contains the results of this 8-stage pipeline (see figure \ref{samplechanger_worflow}): 
 \begin{enumerate}
     \item Comparison of buffer curves using the \textit{CorMap} algorithm \cite{CorMap};
@@ -319,7 +336,9 @@ The superimposed red curve corresponds to the BIFT modeled data.}
 %Averaging of the buffer signal and subtraction of the buffer from sample data are both performed on the 
 %2D frames. 
 Working on the 2D data frames allows a better preservation of weak signals and cancels-out systematic deviation from certain pixels.
+!! 
 this statemern needs prrof, either by citation or by showing some statistics comparing the estimated standard deviation for same data (water? BSA?) for both the old and new pipelines.
+!!
 % The subtracted frame is then integrated using \textit{pyFAI} and the associated uncertainties propagated according to \cite{pyfai_2020}.
 
 % The subtracted SAXS curve is then analyzed with Guinier fit (all three algorithms available in FreeSAS are tested)
