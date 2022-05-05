@@ -216,7 +216,8 @@ HDF5 offers compression, faster data-access, symbolic links to datasets from one
 
 \begin{figure}
      \caption{Layout of a raw image HDF5-file produced by the \textsc{lima} acquisition software, visualized with the \textit{silx} viewer.}
-     \includegraphics*[width=12cm]{lima.eps}
+     %\includegraphics[width=12cm]{lima.eps}
+     \includegraphics[width=12cm]{Figure_2.eps}
      \label{lima}
 \end{figure}
 
@@ -244,7 +245,8 @@ All other processing parameters are sent in the same way, regardless if they are
      2. comparison of 1d-curves;
      3. equivalent frames are averaged;
      4. azimuthal integration of the averaged image.}
-     \includegraphics*[width=12cm]{multiframe_pipeline.eps}
+     %\includegraphics[width=12cm]{multiframe_pipeline.eps}
+     \includegraphics[width=12cm]{Figure_3.eps}
      \end{center}
 \end{figure}
 
@@ -261,7 +263,8 @@ This pipeline is built of four subsequent analysis steps, as illustrated in figu
      \caption{Layout of a HDF5-file obtained from the multi-frame integration pipeline, visualized with the \textit{silx} viewer.
      On the left-hand side, one can recognize in the HDF5-tree the structure of the pipeline described figure \ref{multiframe_worflow}.
      The right-hand side presents the scattering curve of BSA before subtraction of background signal.}
-     \includegraphics*[width=12cm]{multiframe.eps}
+     %\includegraphics[width=12cm]{multiframe.eps}
+     \includegraphics[width=12cm]{Figure_4.eps}
      \label{multiframe}
 \end{figure}
 
@@ -303,7 +306,8 @@ buffer files corresponding to the different acquisition of buffers, usually the 
 
 \begin{figure}
 \label{samplechanger_worflow}
-\includegraphics*[width=12cm]{samplechanger_pipeline.eps}
+\includegraphics[width=12cm]{Figure_5.eps}
+%\includegraphics[width=12cm]{samplechanger_pipeline.eps}
 \caption{Schematic of the sample-changer pipline: 
 1. Comparison of buffer frames image;
 2. Subtraction of averaged buffer image from sample image;
@@ -327,7 +331,8 @@ The pair distribution function obtained from BIFT (stage 7) allows to calculatio
 
 \begin{figure}
 \label{subtracted}
-\includegraphics*[width=12cm]{subtracted.eps}
+%\includegraphics[width=12cm]{subtracted.eps}
+\includegraphics[width=12cm]{Figure_6.eps}
 \caption{Default visualization of the HDF5-file produced by the sample changer pipeline with the \textit{silx} viewer. 
 The superimposed red curve corresponds to the BIFT modeled data.}
 \end{figure}
@@ -371,7 +376,8 @@ The \textsc{hplc} pipeline, figure \ref{hplc_worflow}, re-builds the complete ch
 This pipeline produces files which are presented in figure \ref{hplc}.
 \begin{figure}
 \label{hplc_worflow}
-\includegraphics*[width=12cm]{HPLC_pipeline.eps}
+%\includegraphics[width=12cm]{HPLC_pipeline.eps}
+\includegraphics[width=12cm]{Figure_7.eps}
 \caption{Schematic of the \textsc{hplc} pipline: 
 1. Concatenate ;
 2.\&3. Multivariate analysis;
@@ -395,7 +401,8 @@ This chromatography pipeline has six stages:
 \begin{figure}
 \label{hplc}
 \begin{center}
-\includegraphics[width=12cm]{HPLC-h5web.eps}
+\includegraphics[width=12cm]{Figure_8.eps}
+%\includegraphics[width=12cm]{HPLC-h5web.eps}
 \caption{Default visualization of the HDF5-file produced by the \textsc{hplc} pipeline with the \textit{h5web} viewer integrated into JupyterLab.}
 \end{center}
 \end{figure}
@@ -509,8 +516,13 @@ sigma = numpy.sqrt(numpy.sum([i.sigma**2 for i in integrated], axis=0))/len(inte
 
 Intensities are obtained from an arithmetic average of already weighted curves.
 Uncertainties are obtained from a quadratic average of uncertainties propagated during integration. 
+
 This method does not take into account the fact that some curves did have more weight than others during integration.
-The numerical values are correct only if normalisation factors were similar within the ensemble of curves.
+To examplify the issue, let's consider the averaging of two buffer datasets: one with hundred frames and the second only with a single frame.
+Since those buffers are all equivalent, the uncertainties for the first dataset will be ten times smaller ($\sqrt{100}$) than for the second.
+When merging those dataset with this method, the uncertainties of the first dataset are neglectible compared to the second and the propagated uncertainties will be 40\% smaller than the second dataset, while in reality it should be $10\times$ smaller, ($\sqrt{101}$) ! 
+
+As a rule of thumbs, the numerical values obtained with this method are correct when all normalisation factors are of similar magnitude.
 
 \subsection{Average before integrating}
 The code can be represent in those three lines of Python code:
@@ -523,17 +535,16 @@ q, I, sigma = ai.integrate1d(img_sum, npt, normalization_factor=nrm_sum, error_m
 The \textit{img\_sum} and \textit{nrm\_sum} are equivalent to a single exposure of the detector with much longer integration time, thus the larger normalization factor. 
 Like this, the contribution of the different frames are properly weighted during the azimuthal integration. 
 
-The non equivalence of the two approaches can be demonstrated when using completely arbitrary normalization factors (for example ranging from 1 to 10) for a set of equivalent images.
-The discrepancy is especially visible in the propagated uncertainties.  
+When considering subtraction, since sample and background signal needs to be normalized before subtraction, no benefit is expected from using this approach.     
 
 \subsection{Limitations and future improvements}
 In sample-changer mode, each pipeline handles only few dozens of images at a time, thus all data can easily be held in the memory of the computer.
 In \textsc{hplc} mode, where several hundreds of frames are processed for a single measurement, the same technique could see the computer run out of memory.
-This is why the \textsc{hplc} pipeline still averages integrated curves even if it not (strictly) correct. 
+This is why the \textsc{hplc} pipeline still averages integrated curves even if it not strictly exact, but since all normalisation factors are of same magnitude, the result is still correct.  
 
 In pyFAI, azimuthal integration is performed with ratios of sum of signals and sum of normalizations \cite{pyfai_2020}.
 Those sums can be seen as partially processed data and those partial sums can be aggregated to obtain properly weighted average with their associated uncertainties, as described in \citeasnoun{variance2018}.
-Thus, the memory consumption issue could be alleviated by saving not only the averaged signal, but also the sum of signals, the sum of normalizations and the partial variances.      
+Thus, the memory consumption issue could be alleviated by saving not only the averaged signal, but also the sum of signals, the sum of normalizations and the partial variances and base the merging procedure on those figures rather than on the averaged value.      
 
 \ack{Acknowledgements:}
 The authors wish to thank Guillaume Bonamis for his former contribution to the FreeSAS library and Jesse Hopkins from APS for the fruitful discussion and the the sharing of the code from BioXTAS-RAW.
