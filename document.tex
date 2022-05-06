@@ -82,7 +82,7 @@ Detailed presentation of the automatic data analysis pipelines for the BioSAXS b
 \end{synopsis}
 
 \begin{abstract}
-The second phase of the ESRF upgrade program did not only provide a new storage ring (EBS), it also allowed to refurbish several beam-lines, including the BioSAXS  BM29, which got a larger detector in a new flight tube.
+The second phase of the ESRF upgrade program did not only provide a new storage ring (EBS), it also allowed to refurbish several beam-lines, including the BioSAXS  BM29, which got a new wiggler source and a larger detector.
 To cope with the resulting increased data-flux, analysis software needed to be rewritten to continue to ensure real-time processing.
 This article describes \textit{FreeSAS}, an open-source collection of various SAXS analysis algorithms needed to reduce BioSAXS data, and \textit{dahu}, the tool used to interface data-analysis with beam-line control. 
 It further presents the data processing pipelines for the different data acquisitions modes of the beam-line, using either a sample-changer for individual homogeneous samples or an inline size-exclusion chromatography setup.
@@ -97,7 +97,7 @@ It further presents the data processing pipelines for the different data acquisi
 
 \section{Introduction}
 Small angle scattering (SAS) provides information on the shape of macro-molecules on the nanometer scale and is particularly suited for biological samples thanks a large range of suitable buffer conditions.
-Unlike single crystal diffraction or NMR which offer atomic resolution, bioSAXS provides only information on the envelope of macro-molecules: it allows to validate the relative position of large structures and the assembly of biological complexes \cite{biosaxs_rev2018}. 
+Unlike single crystal diffraction or Nuclear magnetic resonance (NMR) which offer atomic resolution, bioSAXS provides only information on the envelope of macro-molecules: it allows to validate the relative position of large structures and the assembly of biological complexes \cite{biosaxs_rev2018}. 
 Structural biologists perform SAXS experiments to validate the size and the shape of their protein or complex under study. 
 Since most beam-line users are neither synchrotron, nor SAXS specialists, a fully automated analysis of their data is of crucial importance for them. 
 Automated data analysis should provided them not only with the reduced and pre-analyzed data, but also with all metadata and parameters needed to get their results published according to the relevant guidelines \cite{guidelines_2017}.
@@ -106,7 +106,7 @@ These metadata are also important to reprocess data using third party software t
 The BioSAXS beam-line from the European synchrotron \cite{BM29paper} had an automated pipeline for the data-analysis which was based on \textsc{edna} \cite{edna} and was using the \textsc{atsas} \cite{ATSAS2} software underneath. 
 While the outcome of the processing was very appreciated by beam-line users, the system was already close to the maximal throughput possible in terms of performances. 
 The new EBS source \cite{EBS} of the ESRF not only provides a higher brilliance, but also new wiggler sources for the former bending-magnet beam-lines which triggered the re-build and the upgrade of most of them. 
-The BioSAXS beam-line (BM29) has been rebuilt in 2019 and features a  2-pole wiggler, a new flight-tube with an upgraded Pilatus 2M detector (planned to be) mounted in vacuum. 
+The BioSAXS beam-line (BM29) has been rebuilt in 2019 and features a 2-pole wiggler and a new Pilatus3 2M detector (previously 1M) planned to be mounted in vacuum. 
 This has lead to a substantial increase of data-rate; mainly due to the new detector, twice larger than the former one. 
 
 This paper is divided in two main parts, starting with a presentation of the tools used for 
@@ -131,17 +131,13 @@ Despite Python being an interpreted language, FreeSAS is performance oriented an
 \textit{FreeSAS} has been made available and packaged independently from \textit{dahu} (the online analysis tools) so that scientists can reprocess their data and compare their results with those of other analysis software. 
 The latest release, \textit{FreeSAS} 0.9, supports Python 3.6 to 3.9.
 
-\subsubsection{SAS plotting:} The \textit{freesas} tool provides a way to plot a semi-logarithmic representation the SAS curve: $I(q)$, where $q = 4\pi sin(2\theta/2)/\lambda$ is the amplitude of the scattering vector and $I(q)$ the recorded intensity at a given $q$, along side some basic analyses which are described in the next sections.
-
+\subsubsection{SAS plotting:} The \textit{freesas} tool (figure \ref{plot}) provides a way to plot  a semi-logarithmic representation the SAS curve: $I=f(q)$, where $q = 4\pi sin(2\theta/2)/\lambda$ is the amplitude of the scattering vector, $\theta$ is scattering angle, $\lambda$ wavelength and $I$ the recorded intensity at a given $q$, along side some basic analyses which are described in the next sections.
 
 \begin{figure}
 \label{plot}
-\begin{center}
 \includegraphics[width=12cm]{Figure_1.eps}
-\caption{Default visualization of bioSAS data with automated analysis}
-\end{center}
+\caption{Default visualization of bioSAS data with automated analysis using \textit{freesas}}
 \end{figure}
-
 
 \subsubsection{Guinier-region fitting:}
 The first analysis performed on bioSAXS data determines the radius of gyration ($R_g$) of the solvated macro-molecule and the forwards scattering intensity, $I_0$ \cite{guinier}.
@@ -161,7 +157,7 @@ Despite different approach, the result of \textit{bift} is similar to the \texts
 The diameter found, $Dmax$, is directly comparable with the one provided by \textsc{atsas}, but the parameter $\alpha$ differs since the theory used for regularisation differs. 
 
 \subsubsection{Assessment of equivalence of scattering curves: }
-To obtain the best possible signal from the sample, the capillary is exposed multiple times with a short exposure time.
+To obtain the best possible signal from the sample, the capillary containing flowing solution is exposed multiple times with a short exposure.
 All equivalent frames are then merged to optimized the signal/noise ratio without pollution from radiation damaged data.  
 The equivalence of a couple of frames is obtained from the correlation-map (CorMap) algorithm implemented from the publication by \citeasnoun{CorMap}.
 
@@ -360,7 +356,7 @@ Once again, the subtraction is made on 2D frames and not on integrated curves fo
 % All those information are registered and the default plot is defined to have a display similar to figure \ref{subtracted}
 % with the scattering curve superimposed with the BIFT-fitted scattering curve.
 
-The final stage of this pipeline is to register those results into the ISPyB for BioSAXS \cite{ISPYBB} database and instantly made available to the user via the BioSAXS data portal (https://exi2.esrf.fr). 
+The final stage of this pipeline is to register those results into the ISPyB for BioSAXS database \cite{ISPYBB} (https://exi.esrf.fr), and instantly made available to the user via the data portal (https://data.esrf.fr). 
 The same data are shared with the BsxCuBE3 control software via a memcached key-value database for instant feed-back.
 
 \subsection{SEC-SAXS pipeline}
@@ -502,16 +498,16 @@ On the other hand, the \textsc{hplc} pipeline performs the average and backgroun
 This section describes the code for performing those two operations and discuses the rational behind it.
 It will also try to distinguish which is the most correct. 
 Let \textit{frames} and \textit{diode} be a list of acquired frames and beam-stop diode intensities, respectively.
-And assume \textit{ai} is a configured azimuthal integrator (as available from pyFAI).
+Also assume \textit{ai} is a configured azimuthal integrator (as available from pyFAI) and \textit{npt} the number of points in the radial dimension.
 
 \subsection{Integrate before averaging}
 The code can be represent in those four lines of Python code:
 \begin{verbatim} 
-integrated = [ ai.integrate1d(frame, npt, normalization_factor=norm, error_model="poisson") 
-               for frame, norm in zip(frames, diode)]
-q =integrated[0].radial
-I = numpy.mean([i.intensity for i in integrated], axis=0)
-sigma = numpy.sqrt(numpy.sum([i.sigma**2 for i in integrated], axis=0))/len(integrated)
+litg = [ai.integrate1d(frm, npt, normalization_factor=nrm, error_model="poisson") 
+        for frm, nrm in zip(frames, diode)]
+q = litg[0].radial
+I = numpy.mean([itg.intensity for itg in litg], axis=0)
+sigma = numpy.sqrt(numpy.sum([itg.sigma**2 for itg in litg], axis=0))/len(litg)
 \end{verbatim}
 
 Intensities are obtained from an arithmetic average of already weighted curves.
@@ -533,22 +529,21 @@ q, I, sigma = ai.integrate1d(img_sum, npt, normalization_factor=nrm_sum, error_m
 \end{verbatim}
 
 The \textit{img\_sum} and \textit{nrm\_sum} are equivalent to a single exposure of the detector with much longer integration time, thus the larger normalization factor. 
-Like this, the contribution of the different frames are properly weighted during the azimuthal integration. 
+This allows the contribution of different frames to be properly weighted during the azimuthal integration. 
 
-When considering subtraction, since sample and background signal needs to be normalized before subtraction, no benefit is expected from using this approach.     
+%When considering subtraction, since sample and background signal needs to be normalized before subtraction, no benefit is expected from using this approach.     
 
 \subsection{Limitations and future improvements}
 In sample-changer mode, each pipeline handles only few dozens of images at a time, thus all data can easily be held in the memory of the computer.
 In \textsc{hplc} mode, where several hundreds of frames are processed for a single measurement, the same technique could see the computer run out of memory.
 This is why the \textsc{hplc} pipeline still averages integrated curves even if it not strictly exact, but since all normalisation factors are of same magnitude, the result is still correct.  
 
-In pyFAI, azimuthal integration is performed with ratios of sum of signals and sum of normalizations \cite{pyfai_2020}.
-Those sums can be seen as partially processed data and those partial sums can be aggregated to obtain properly weighted average with their associated uncertainties, as described in \citeasnoun{variance2018}.
-Thus, the memory consumption issue could be alleviated by saving not only the averaged signal, but also the sum of signals, the sum of normalizations and the partial variances and base the merging procedure on those figures rather than on the averaged value.      
+In pyFAI, azimuthal integration is performed with ratios of sum of signal and sum of normalization \cite{pyfai_2020}.
+Those sums can be seen as partially processed data and those partial sums can be aggregated to obtain properly weighted average and uncertainties, as described in \citeasnoun{variance2018}.
+Thus, the memory consumption issue could be alleviated by saving not only the averaged signal, but also the sum of signal, the sum of normalization and the partial variances and base the merging procedure on those figures rather than on the averaged value.
 
 \ack{Acknowledgements:}
 The authors wish to thank Guillaume Bonamis for his former contribution to the FreeSAS library and Jesse Hopkins from APS for the fruitful discussion and the the sharing of the code from BioXTAS-RAW.
-
 
 \bibliographystyle{iucr}
 \bibliography{biblio}
