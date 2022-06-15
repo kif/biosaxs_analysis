@@ -241,19 +241,17 @@ HDF5 offers compression, faster data-access, symbolic links to datasets from one
 \end{figure}
 
 ESRF provides several tools to visualize those HDF5 files like \textit{silx view} \cite{silx} which is a graphical user interface based on Qt \cite{pyqt} or the web-viewer \textit{h5web} \cite{h5web} to visualize those files inside a web-browser.
-The \textit{h5web} library is already used in the beam-line control user interface BsxCuBE3 \cite{bm29_2022} and in the ESRF data-portal \cite{data-portal} where data is automatically catalogued and made accessible to the experimental team during the embargo period and then made public released afterwards following the ESRF data policy \cite{data-policy}. 
-Figure \ref{data-portal} presents the . 
+The \textit{h5web} library is already used in the beam-line control user interface BsxCuBE3 \cite{bm29_2022} and in the ESRF data-portal \cite{data-portal} where data is automatically catalogued and made accessible to the experimental team during (figure \ref{dataportal} the embargo period and then made public released afterwards following the ESRF data policy \cite{data-policy}. 
 
 \begin{figure}
      \caption{Default visualization offered by the ESRF data-portal (https://data.esrf.fr) of a stack of frames acquired at the BioSAXS beam-line, using the \textit{h5web} viewer.}
-     \includegraphics[width=12cm]{lima.eps}
-     %\includegraphics[width=12cm]{Figure_2.eps}
-     \label{lima}
+     \includegraphics[width=12cm]{dataportal.eps}
+     %\includegraphics[width=12cm]{Figure_2a.eps}
+     \label{dataportal}
 \end{figure}
 
-\textit{h5web}
 Since \textsc{lima} saved frames (figure \ref{lima}) contain no metadata beside the camera configuration, all sample and experiment description (geometry, mask, \ldots), beam-stop diode intensities and other processing parameters have to be provided by the experiment sequencer, \textsc{bliss}, as part of the job description when triggering the process. 
-This configuration can be retrieved from the data-portal web page as the JSON-file \cite{json}.
+This configuration can be retrieved from the data-portal web page (figure \ref{dataportal}) as the JSON-file \cite{json}.
 
 The versatility of the HDF5 format allows to have one single output file for all results produced by a processing pipeline, making backup easier.
 Each pipeline registers the result of every individual processing step of the pipeline in the output HDF5 file (as HDF5-groups), together with the configuration associated with the processing.
