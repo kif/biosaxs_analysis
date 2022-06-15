@@ -100,8 +100,8 @@ It further presents the data processing pipelines for the different data acquisi
 Small angle scattering (SAS) provides information on the shape of macro-molecules on the nanometer scale and is particularly suited for biological samples thanks to a large range of suitable buffer conditions.
 Unlike single crystal diffraction or Nuclear magnetic resonance (NMR) which offer atomic resolution, bioSAXS provides only information on the envelope of macro-molecules: it allows to validate the relative position of large structures and the assembly of biological complexes \cite{biosaxs_rev2018}. 
 Structural biologists perform SAXS experiments to validate the size and the shape of their protein or complex under study. 
-Since most beam-line users are neither synchrotron, nor SAXS specialists, a fully automated analysis of their data is of crucial importance for them. 
-Automated data analysis should provided them not only with the reduced and pre-analyzed data, but also with all metadata and parameters needed to get their results published according to the relevant guidelines \cite{guidelines_2017}.
+Since most beam-line users are biologists, thus neither synchrotron, nor SAXS specialists, a fully analysis of their data is of crucial importance to them \cite{shibom}. 
+Whereas most BioSAXS beam-lines throughout the world have focused on the graphical user interface for helping users with their analysis \cite{dawn, als-biosaxs}, BM29 has focused on fully automated data analysis which provides them not only with the reduced and pre-analyzed data, but also with all metadata and parameters needed to get their results published according to the relevant guidelines \cite{guidelines_2017}.
 These metadata are also important to reprocess data using third party software to ensure comparable results. 
 
 The BioSAXS beam-line from the European synchrotron \cite{BM29paper} had an automated pipeline for the data-analysis which was based on \textsc{edna} \cite{edna} and was using the \textsc{atsas} \cite{ATSAS2} software underneath. 
@@ -489,15 +489,17 @@ From the figures in table \ref{stats}, one can estimate \textsc{hplc}-mode repre
 
 \subsection{Performances}
 Direct performance comparison with the former online data-analysis pipeline \cite{BM29ODA}, based on EDNA, is difficult to assess since their structure is very different and the computer equipment has evolved.
-EDNA was processing data frame per frame and used to take 2.3s to integrate a 1 mega-pixel image from the former Pilatus detector.
-With this new pipeline, 1s are usually needed to integrate ten 2.4 mega-pixel images in sample-changer mode and 10s for the 100 frames per file in \textsc{hplc} mode, (table \ref{stats}).
+EDNA was processing frame per frame and used to take 2.3s to integrate a single 1 mega-pixel image from the former Pilatus detector.
+With this new pipeline, 1s are usually needed to integrate ten 2.4 mega-pixel images in sample-changer mode and 10s for the 100 frames per file in \textsc{hplc} mode, (table \ref{stats}), which makes average throughput of 10 frames/s.
 
-All computations are now executed on a single computer equipped with a single hexa-core processor and an entry-level graphics card (Intel Xeon E5-2643 v3 + Nvidia Quadro M2000) which is nevertheless much more recent than the previous se.
-From the figures shown in table \ref{stats}, the azimuthal integration for one Pilatus3 2M frame takes 0.1s (when batched by 100) which can be compared with the 2.3s which were necessary with the former EDNA-pipeline for processing one Pilatus 1M image.
+All computations are now executed on a single computer equipped with a single hexa-core processor and an entry-level graphics card (Intel Xeon E5-2643 v3 + Nvidia Quadro M2000) which have replaced the previous setup (based on Intel Pentium4 + Quadro4000).
+%From the figures shown in table \ref{stats}, the azimuthal integration for one Pilatus3 2M frame takes 0.1s (when batched by 100) which can be compared with the 2.3s which were necessary with the former EDNA-pipeline for processing one Pilatus 1M image.
 
-During those 20 months, the \textit{dahu}-server has been started 90 times, which corresponds to the weekly restart to apply security patches and other bug-corrections. 
-Since all data-reduction occurs within the same process using threads, this demonstrates not only the reliability of the \textit{dahu}-server 
-but also of the whole pipeline including \textit{FreeSAS} analysis.
+%During those 20 months, the \textit{dahu}-server has been started 90 times, which corresponds to a weekly restart to apply security patches and other bug-corrections. 
+%Since all data-reduction occurs within the same process using threads, this processing being performed in compiled code, any bug 
+%this demonstrates not only the reliability of the \textit{dahu}-server 
+%but also of the whole pipeline including \textit{FreeSAS} analysis.
+
 \subsection{Outlook}
 %Future development include adaptation for the micro-fluidic setup, and for the new ISPyB database under development. 
 %Another major development will be the \textit{ab-inito} modeling based on SAXS data for which one 
@@ -511,8 +513,6 @@ It should be possible to weight properly those curves to obtain an average which
 Future algorithmic work will focus on \textit{ab-initio} shape reconstruction, based on the DENSS \cite{denss} which is currently too slow to run with real-time constrains at the beam-line.
 
 \section{Conclusion}
-
-TODO: Place propely those citation requested by editor \cite{shibom} \cite{dawn} \cite{als-biosaxs}
 
 This document introduces the \textit{FreeSAS} and the \textit{dahu} software packages which are used respectively to analyse bioSAXS data 
 and control online data analysis at the BioSAXS beam-line at the European synchrotron. 
