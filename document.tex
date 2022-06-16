@@ -113,8 +113,8 @@ This has lead to a substantial increase of data-rate; mainly due to the larger d
 This paper is divided into two main parts, starting with a presentation of the tools used: \textit{FreeSAS} and \textit{dahu}.
 The section 3 presents the three different pipelines used at the beam-line are presented: the common one for the reduction of the scattering images, the one used together with the sample-changer (referred as SC) and the one used with the size exclusion chromatography setup (referred as \textsc{hplc}).
 \section{Tools}
-
-To meet the real-time data analysis requirements, all software used at the beam-line has been upgraded.
+During the upgrade of the beam-line, most software was replaced by completely new developments: the sequencer \texttt{spec} \cite{spec} was replaced by \textsc{bliss} \cite{bliss}, the graphical user interface BsxCuBE (Biosaxs Customized Beam-line Environment) was re-implemented with web-technology instead of the deprecated PyQt4 interface.
+To meet the real-time feed-back requirements, the software doing the analysis was also re-written.
 Precise benchmark of the execution times of the previous \textsc{edna}-based pipeline demonstrated that 
 most time was spent in launching external tools coming from the \textsc{atsas} suite and in parsing text files produced by those tools.
 It was decided to rewrite all pipeline in plain Python \cite{python} and call SAS-related tasks from a library, \textit{FreeSAS}. 
@@ -130,7 +130,7 @@ Despite Python being an interpreted language, \textit{FreeSAS} is performance or
 \textit{FreeSAS} has been made available and packaged independently from \textit{dahu} (the online analysis tools) so that scientists can reprocess their data and compare their results with those of other analysis software. 
 The latest release, \textit{FreeSAS} 0.9, supports Python 3.6 to 3.9.
 
-\subsubsection{SAS plotting:} The \textit{freesas} tool (one of the command line tool provided by the \textit{FreeSAS} suite, figure \ref{plot}) provides a way to plot  a semi-logarithmic representation of the SAS curve: $I=f(q)$, where $q = 4\pi sin(\theta)/\lambda$ is the amplitude of the scattering vector, $\theta$ is scattering angle, $\lambda$ wavelength and $I$ the recorded intensity at a given $q$, along side some basic analyses which are described in the next sections.
+\subsubsection{SAS plotting:} The \textit{freesas} tool (one of the command line tool provided by the \textit{FreeSAS} suite (figure \ref{plot}) provides a way to plot  a semi-logarithmic representation of the SAS curve: $I=f(q)$, where $q = 4\pi sin(\theta)/\lambda$ is the amplitude of the scattering vector, $\theta$ is half the scattering angles, $\lambda$ the wavelength and $I$ the recorded intensity at a given $q$, along side some basic analyses which are described in the next sections.
 
 \begin{figure}
 \label{plot}
@@ -193,22 +193,27 @@ The later toolbox is built on top of several decades of experience acquired the 
 \subsection{The job-manager: \textit{dahu}}
 
 The role of the job manager is to ensure all processing requested by the client (i.e. the user interface) are actually performed, informs the client about the finished jobs and warns it in case of an error.
+
 %(what do you mean by client? The requestor?) is informed in case of issues. %Only if issues arrise? Or is other information also returned?
 %This subsection is purely technical and can be skipped. 
 
-\textsc{edna} was used as workflow manager for the previous data-analysis pipeline for many protein crystallography beam-lines \cite{edna} and for the BioSAXS beam-line at the ESRF \cite{BM29ODA}.
+\textsc{Edna} was used as workflow manager for the previous data-analysis pipeline for many protein crystallography beam-lines \cite{edna} and for the BioSAXS beam-line at the ESRF \cite{BM29ODA}.
 The parallelization model used in \textsc{edna} is based on Python threads and forking processes which was wasting resources in serializing and inter-process communication. 
 %Despite the Global Interpreter Lock (GIL) which prevents Python from running multiple threads simultaneously, parallel processing occues when the work is performed in separated process. 
 %This implies that for each task to be perfomed, an input file needs to be written before launching the process and the result file needs to be read and parsed after the end of the processing.
 %When processing was doing loops of jobs, most of the time was spent in string manipulation for writing and parsing strings (for example: to compare pair-wise 10 frames it takes 45 process to be launched !)
  
-The \textit{dahu} job-manager was designed for the TruSAXS beamline \cite{id02_2022} with those limitation in mind. 
+The \textit{dahu} job-manager was designed for the TruSAXS beamline \cite{id02_2022} with those limitation in mind and a short latency constrain: some jobs, there, needs to be processed with a couple of milliseconds. 
+This latency constrain prevented us from using classical batch queuing systems like \textsc{slurm} \cite{slurm}, despite their efficiency at distributing heavy jobs, since their scheduling algorithms take several seconds to run.
+
 %Text manipulation was simplified by switching from XML to JSON data-structure representation. 
 %This modification alone has proven to speed up \textsc{edna} by a factor 3 !
 The tango interface \cite{tango} was kept similar to the one in \textsc{edna} to ease the adoption.
 %, the adaptation was  framework were kept and the code was simplified to the extreme since \textit{dahu} represents only 1000 lines of code. 
 The scheduling of jobs is performed via a shared queue and only few workers are running simultaneously in threads.
 Thus the code runs actually in parallel only in sections where the Global Interpreter Lock from Python (GIL) is released, like in Cython extensions \cite{cython} from FreeSAS or in the OpenCL code from pyFAI \cite{pyFAI_gpu}.
+
+
 
 \subsubsection{Dahu-jobs}
 manage the execution of the \textit{plugins} (see here-after), provide an unique identifier which gives access to the status and output of the processing.
@@ -225,13 +230,14 @@ Nevertheless, to reprocess data acquired at the BioSAXS beam-line, one would nee
 
 \section{Data analysis pipelines}
 \label{pipeline}
-There are two main experiments performed at the BioSAXS beam-line, either using the sample changer (SC) or the inline-chromatography setup (improperly called \textsc{hplc}).
+There are two main experiments performed at the BioSAXS beam-line, either using the sample changer (referred to as SC) or the inline-chromatography setup (referred to as \textsc{hplc} since it uses a High Pressure liquid Chromatograph).
 Thus, two analysis pipelines were built, one for each of those experimental modes.
 The common part, mainly dealing with azimuthal integration, is integrated into a pre-processing pipeline called \textit{integrate multi-frame}.
 %This would profit from  description of how the data is actually structured in the two acquisition modes. I got completely lost here!
 
-Since the Pilatus3 2M detector is controlled by the \textsc{lima} software \cite{lima}, raw images are saved in a HDF5 file-format \cite{hdf5} with ten or hundred frames per file (depending on the acquisition mode, figure \ref{lima}).
-HDF5 offers compression, faster data-access, symbolic links to datasets from one file to another ... but it is dramatically different from the former pipeline which was triggered frame per frame.
+Since the Pilatus3 2M detector is controlled by the \textsc{lima} software \cite{lima}, raw images are now saved in a HDF5 file-format \cite{hdf5} with ten or hundred frames per file (depending on the acquisition mode, figure \ref{lima}).
+HDF5 offers compression, faster data-access, symbolic links to datasets from one file to another ... and is imposed by the ESRF data-policy \cite{data-policy}. 
+This data-structure with several frame per file prevents us from re-using the former \textsc{edna} pipelines which were  all triggered frame by frame.
 
 \begin{figure}
      \caption{Layout of a raw image HDF5-file produced by the \textsc{lima} acquisition software, visualized with the \textit{silx} viewer.}
@@ -388,8 +394,8 @@ Once again, the subtraction is made on 2D frames and not on integrated curves fo
 % with the scattering curve superimposed with the BIFT-fitted scattering curve.
 
 The final stage of this pipeline is to register those results into the ISPyB for BioSAXS database \cite{ISPYBB} (https://exi.esrf.fr), and instantly available to the user via the data portal (https://data.esrf.fr). 
-The same data are shared with the BsxCuBE3 control software via a memcached key-value database for instant feed-back.
-[TODO: reformulate + data-portal]
+The same data are shared with the BsxCuBE3 control software via a \textit{memcached} key-value database for instant feed-back.
+
 \subsection{SEC-SAXS pipeline}
 %I have to admit that I ma quite lost in this section. I suspect the reason is that I do not understnad how the input data looks like? Are there 10 partial chromatograms per run? 100? 1000? that makes quite a difference, doesn't it? 
 Online purification of the sample allows to reduce the effect of oligomerization.
@@ -475,9 +481,9 @@ The table \ref{stats} summarizes some figures collected:
         \hline
         Processing pipeline & \#calls & Frame processed & run-time per job \\
         \hline
-        Integrate multi-frame & 42575 & 1230k & 2.1s (1s, 10s) \\
-        Subtract \& SAS analysis & 11214 & 336k & 7.3s \\
-        \textsc{hplc} analysis & 709 & 893k & 2.9s \\
+        Integrate multi-frame & 42575 & 1230k & 2.1 s (1 s, 10 s) \\
+        Subtract \& SAS analysis & 11214 & 336k & 7.3 s \\
+        \textsc{hplc} analysis & 709 & 893k & 2.9 s \\
         \hline
     \end{tabular}
     
@@ -489,8 +495,10 @@ From the figures in table \ref{stats}, one can estimate \textsc{hplc}-mode repre
 
 \subsection{Performances}
 Direct performance comparison with the former online data-analysis pipeline \cite{BM29ODA}, based on EDNA, is difficult to assess since their structure is very different and the computer equipment has evolved.
-EDNA was processing frame per frame and used to take 2.3s to integrate a single 1 mega-pixel image from the former Pilatus detector.
-With this new pipeline, 1s are usually needed to integrate ten 2.4 mega-pixel images in sample-changer mode and 10s for the 100 frames per file in \textsc{hplc} mode, (table \ref{stats}), which makes average throughput of 10 frames/s.
+EDNA was processing frame per frame and used to take 2.3 s to integrate a single 1 mega-pixel image from the former Pilatus detector.
+With this new pipeline, 1 s are usually needed to integrate ten 2.4 mega-pixel images in sample-changer mode and 10 s for the 100 frames is a  file in \textsc{hplc} mode, (table \ref{stats}), which makes average throughput of 10 frames/s.
+
+Performances for the \texit{sample-changer pipeline} (7.3 s) can directly be compared with the former EDNA processing which were called \textit{autoSub} (2.1 s) and \texit{SAXSAnalysis} (9.7s).
 
 All computations are now executed on a single computer equipped with a single hexa-core processor and an entry-level graphics card (Intel Xeon E5-2643 v3 + Nvidia Quadro M2000) which have replaced the previous setup (based on Intel Pentium4 + Quadro4000).
 %From the figures shown in table \ref{stats}, the azimuthal integration for one Pilatus3 2M frame takes 0.1s (when batched by 100) which can be compared with the 2.3s which were necessary with the former EDNA-pipeline for processing one Pilatus 1M image.
@@ -507,7 +515,8 @@ All computations are now executed on a single computer equipped with a single he
 %New microfluidic setup
 % new IspyB for BioSAXS
 
-The foreseeable future should replace of the legacy version of the ISPyB database with a new one which will include better web visualization capabilities of the generated HDF5 files.
+The foreseeable future should see a better integration of BioSAXS data into the data-portal with a better web visualization capabilities of the processed HDF5-files. 
+%and replace of the legacy version of the ISPyB database with a new one which will include 
 The buffer averaging and subtraction in \textsc{hplc} mode is not (strictly) exact since it is based on integrated curves which have been normalized.
 It should be possible to weight properly those curves to obtain an average which is exactly the same as if one would have averaged or subtracted 2D frames and integrated the result (discussed in appendix \ref{rational}).
 Future algorithmic work will focus on \textit{ab-initio} shape reconstruction, based on the DENSS \cite{denss} which is currently too slow to run with real-time constrains at the beam-line.
@@ -525,8 +534,10 @@ not only convenient storage but allows also reproducible science following the F
 \section{Method}
 
 All figures were obtained from test-samples used at the beam-line: Bovine Serum Albumin (BSA) in solution at 5 mg/mL in a HEPES buffer.
-
-+ description of the columns + elution speed
+The incident X-ray energy was set to 12.5 keV by a multilayer monochromator with a bandpass of 1\% offering a flux of $1.4\times 10^{13} photons.s^{-1}$.
+Experiment performed in sample-changer mode acquired ten frames of 1s exposure each.
+Experiment in \textsc{hplc} mode were using an Agilent Advance Bio SEC 300Å, 4.6 x 300 mm chromatographic column with a flow rate of 0.35 mL/min.
+Acquisition was performed with 2 s exposure time and lasted 400 frames. 
 
 \section{Rational for working with 2D frames rather than integrated curves}
 \label{rational}
@@ -552,9 +563,9 @@ Intensities are obtained from an arithmetic average of already weighted curves.
 Uncertainties are obtained from a quadratic average of uncertainties propagated during integration. 
 
 This method does not take into account the fact that some curves did have more weight than others during integration.
-To examplify the issue, let's consider the averaging of two buffer datasets: one with hundred frames and the second only with a single frame.
+To exemplify the issue, let's consider the averaging of two buffer datasets: one with hundred frames and the second only with a single frame.
 Since those buffers are all equivalent, the uncertainties for the first dataset will be ten times smaller ($\sqrt{100}$) than for the second.
-When merging those dataset with this method, the uncertainties of the first dataset are neglectible compared to the second and the propagated uncertainties will be 40\% smaller than the second dataset, while in reality it should be $10\times$ smaller, ($\sqrt{101}$) ! 
+When merging those dataset with this method, the uncertainties of the first dataset are negligible compared to the second and the propagated uncertainties will be 40\% smaller than the second dataset, while in reality it should be $10\times$ smaller, ($\sqrt{101}$) ! 
 
 As a rule of thumbs, the numerical values obtained with this method are correct when all normalisation factors are of similar magnitude.
 
