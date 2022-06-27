@@ -100,7 +100,7 @@ It further presents the data processing pipelines for the different data acquisi
 Small angle scattering (SAS) provides information on the shape of macro-molecules on the nanometer scale and is particularly suited for biological samples thanks to a large range of suitable buffer conditions.
 Unlike single crystal diffraction or Nuclear Magnetic Resonance (NMR) which offer atomic resolution, bioSAS provides only information on the envelope of macro-molecules: it allows to validate the relative position of large structures and the assembly of biological complexes \cite{biosaxs_rev2018}. 
 Structural biologists perform SAXS experiments to validate the size and the shape of their protein or complex under study. 
-Since most beam-line users are biologists, they are neither synchrotron, nor SAXS specialist.
+Since most beam-line users are biologists, they are neither synchrotron, nor SAXS specialists.
 A full analysis of their data is thus of crucial importance to them \cite{shibom}. 
 
 
@@ -116,17 +116,17 @@ This paper is divided into two main parts and starts with a presentation of the 
 The section 3 presents the three different pipelines used at the beam-line: the common pipeline for the reduction of scattering images, the pipeline used with the sample-changer and the one used with the size exclusion chromatography setup.
 
 \section{Tools}
-During the upgrade of the beam-line, most software was replaced by completely new developments: the sequencer \texttt{spec} \cite{spec} was replaced by \textsc{bliss} \cite{bliss}, the graphical user interface BsxCuBE (Biosaxs Customized Beam-line Environment) was re-implemented with web-technology, replacing the PyQt4 interface, ...
+During the upgrade of the beam-line, most software have been replaced by completely new developments: the sequencer \texttt{spec} \cite{spec} was replaced by \textsc{bliss} \cite{bliss}, the graphical user interface BsxCuBE (Biosaxs Customized Beam-line Environment) was re-implemented with web-technology, replacing the PyQt4 interface, ...
 To meet the real-time feed-back requirement, the software doing the analysis was also re-written.
 
-Precise benchmark of the execution times (see also \ref{performances}) of the previous \textsc{edna}-based pipeline \cite{BM29ODA} demonstrated that most time was spent in launching external tools coming from the \textsc{atsas2} suite and in parsing output files produced by those tools; not in the execution of those external programs.
+Precise benchmark of the execution times (see also section \ref{performances}) of the previous \textsc{edna}-based pipeline \cite{BM29ODA} demonstrated that time was mostly spent in launching external tools coming from the \textsc{atsas2} suite and in parsing output files produced by those tools; not in the execution of those external programs.
 It was decided to rewrite all pipelines in plain Python \cite{python} and to regroup all SAS-related analysis within a library, \textit{FreeSAS}, which would be easy to distribute. 
-Pipelines \cite{dahu-bm29} are heavily optimized for running on the beam-line thus cannot easily be reused despite their MIT-license.
+Pipelines \cite{dahu-bm29} are heavily optimized for running on the beam-line hardware thus cannot easily be reused despite their MIT-license.
 Finally, this code is interfaced to the control software, \textsc{bliss} \cite{bliss}, via Tango \cite{tango} and uses a simple task scheduler, \textit{dahu}, already used at the \textsc{trusaxs} beam-line \cite{id02_2022}.
 
 \subsection{Small angle scattering analysis tools, \textit{FreeSAS}}
 
-\textit{FreeSAS} is a Python library \cite{python} containing SAS-analysis tools available both via a Python API and from the command line interface (which name is referenced  with \texttt{monospaced} font). 
+\textit{FreeSAS} is a Python library \cite{python} containing SAS-analysis tools available both via a Python API and from the command line interface (program names are referenced to using a \texttt{monospaced} font). 
 It does not claim to be as complete as the \textsc{atsas} counterpart \cite{ATSAS3},
 but is free, released under the liberal MIT license (i.e. it can be included into commercial products), all source code is available publicly on github \cite{freesas} and it is open to external contributions.
 Table \ref{freesas-atsas} summarizes this comparison.
@@ -134,9 +134,9 @@ Despite Python being an interpreted language, \textit{FreeSAS} is performance or
 \textit{FreeSAS} has been made available and packaged independently from \textit{dahu} (the online analysis tools) and from the processing pipelines so that scientists can reprocess their data and compare their results with those of other analysis software like Sc\AA tter \cite{scatter}. 
 The current release, \textit{FreeSAS} 0.9, supports Python 3.6 to 3.9.
 
-\subsubsection{SAS plotting:} The \texttt{freesas} command line tool (provided by the \textit{FreeSAS} suite), figure \ref{plot}, provides a way to plot a semi-logarithmic representation of the SAS curve: $I=f(q)$, where $q = 4\pi sin(\theta)/\lambda$ is the amplitude of the scattering vector, $\theta$ is half the scattering angles, $\lambda$ the wavelength and $I$ the recorded intensity at a given $q$; along side with some basic analyses which are described in the next sections.
+\subsubsection{SAS plotting:} The \texttt{freesas} command line tool (provided by the \textit{FreeSAS} suite), figure \ref{plot}, provides a way to plot a semi-logarithmic representation of the SAS curve: $I=f(q)$, where $q = 4\pi sin(\theta)/\lambda$ is the amplitude of the scattering vector, $\theta$ is half the scattering angles, $\lambda$ the wavelength and $I$ the recorded intensity at a given $q$; along side with some basic analyses which are described in next sections.
 The program takes as entry a 3-column \textsc{ascii} file containing $q$, $I$ and $\sigma$. 
-The unit of $q$ can be precised as command line argument.
+% The unit of $q$ can be precised as command line argument.
 
 \begin{figure}
 \label{plot}
@@ -152,7 +152,7 @@ The first analysis performed on bioSAS data is to determines the radius of gyrat
 Based on the Tailor expansion of the scattering curve at $q=0$, $R_g$ is obtained from the the linear regression of $log(I(q)) = log(I_0)-1/3 (R_{G}q)^{2}$ on the proper q-range, at small angles, called the Guinier region.
 The selection of the Guinier-region is far from being obvious due to the beam-stop shadow, aggregation effects, and its upper limit depends on $R_g$ itself: $q \cdot R_g<1.3$.
 Thus multiple implementation are provided: \texttt{free\_rg}, which derives from the implementation in BioXTAS-RAW \cite{bioxtasraw}; \texttt{free\_guinier}, which searches for a consensus region rather than the best possible Guinier-region; and finally \texttt{free\_gpa}, which performs a Guinier-peak-analysis \cite{gpa}. 
-The later is a quick assessment of the $R_g$ and $I_0$, sometimes less robust than the two other implementations, but suitable when many datasets are to be analyzed like in chromatography mode.
+The later is a quick assessment of the $R_g$ and $I_0$, sometimes less robust than the two other implementations, but suitable when many data sets are to be analyzed like in chromatography mode.
 It is worth mentioning that none of the three algorithms provide the exact same results as the original \textsc{autorg} \cite{ATSAS2} version from \textsc{atsas}. 
 This highlights the importance of publishing the actual implementation of the algorithms with the associated numerical parameters used in it.
   
@@ -160,10 +160,9 @@ This highlights the importance of publishing the actual implementation of the al
 Although the scattering curve $I(q)$ is the Fourier transform of the pair distribution function $p(r)$, the later cannot directly be obtained from an inverse Fourier transform (IFT) due to the loss of phase information and the limited amount of information in the scattering curve. 
 This ill-posed mathematical problem has no exact solution and is usually inverted using some extra constraints, like the finite size of the macro-molecule (defined by its maximum diameter, $Dmax$).    
 FreeSAS proposes an IFT based on the Bayesian statistics and derived from \textsc{bift} \cite{bift} and the implementation in BioXTAS-RAW \cite{BioXTAS}.
-The implementation in \textit{FreeSAS}, called \texttt{free\_bift}, is based on Cython \cite{cython} and uses BLAS\cite{blas} and multi-threading for performances.
+The implementation in \textit{FreeSAS}, called \texttt{free\_bift}, is based on Cython \cite{cython} and uses \textssc{blas} \cite{blas} and multi-threading for performances.
 %The command-line program to perfrom and IFT is \textit{bift.py}. 
 Despite their different approaches, \texttt{free\_bift} provides similar results to those of \textsc{datgnom} \cite{ATSAS1} from \textsc{atsas} which uses a Tikhonov's regularisation.
-The diameter found, $Dmax$, is directly comparable with the one provided by \textsc{atsas}, but the parameter $\alpha$ differs since the theory used for regularisation differs. 
 
 \subsubsection{Other tools available in \textit{FreeSAS}:}
 \begin{itemize}
@@ -214,11 +213,11 @@ The parallelization model used in \textsc{edna} is based on Python threads and f
  
 %The \textit{dahu} job-manager was designed for the \textsc{trusaxs} beam-line \cite{id02_2022} with those limitations in mind and additional low latency constrain: some jobs, there, needs to be processed with a dozen of milliseconds. 
 The \textit{dahu} job-manager was designed for the low latency constraints of the \textsc{trusaxs} beam-line \cite{id02_2022}, where some jobs need to be processed within a dozen of milliseconds.
-Batch queuing systems, like \textsc{slurm} \cite{slurm}, are very efficient at distributing heavy jobs, but none was optimized was optimized for reduced scheduling time (or low latency).
+Batch queuing systems, like \textsc{slurm} \cite{slurm}, are very efficient at distributing heavy jobs, but none was optimized for reduced scheduling time (or low latency).
 
 %Text manipulation was simplified by switching from XML to JSON data-structure representation. 
 %This modification alone has proven to speed up \textsc{edna} by a factor 3 !
-The tango interface \cite{tango} was kept similar to the one in \textsc{edna} to ease the transition.
+The tango interface \cite{tango} implemented in \textit{dahu} was kept similar to the one in \textsc{edna} to ease the transition.
 %, the adaptation was  framework were kept and the code was simplified to the extreme since \textit{dahu} represents only 1000 lines of code. 
 The scheduling of jobs is performed via a shared queue and only few workers are running simultaneously in different threads.
 Thus the code runs actually in parallel only in sections where the Global Interpreter Lock from Python (GIL) is released, like in Cython extensions \cite{cython} from FreeSAS or in the OpenCL code from pyFAI \cite{pyFAI_gpu}.
@@ -246,9 +245,9 @@ The common part, mainly dealing with azimuthal integration, is integrated into a
 %This would profit from  description of how the data is actually structured in the two acquisition modes. I got completely lost here!
 
 Since the Pilatus3 2M detector is controlled by the \textsc{lima} software \cite{lima}, raw images are now saved in a HDF5 file-format \cite{hdf5} with ten or hundred frames per file (depending on the acquisition mode, figure \ref{lima}).
-HDF5 is not only imposed by the ESRF data policy  \cite{data-policy} but offers numerous benefits such as compression, faster data-access, symbolic links to datasets from one file to another ...
+HDF5 is not only imposed by the ESRF data policy  \cite{data-policy} but offers numerous benefits such as compression, faster data-access, symbolic links to data-sets stored in other files ...
 % HDF5 offers compression, faster data-access, symbolic links to datasets from one file to another ... and is imposed by the ESRF data-policy \cite{data-policy}. 
-This data-structure with several frames per file prevents us from re-using the former \textsc{edna} pipelines which were  all triggered frame by frame.
+This data-structure with several frames per file prevents us from re-using the former \textsc{edna} pipelines which were triggered frame by frame.
 
 \begin{figure}
      \caption{Layout of a raw image HDF5-file produced by the \textsc{lima} acquisition software and visualized with the \textit{silx} viewer.}
@@ -272,13 +271,13 @@ This configuration can be retrieved from the data-portal web page (figure \ref{d
 
 The versatility of the HDF5 format allows to have one single output file for all results produced by a processing pipeline, making archival easier.
 Each pipeline registers the result of every individual processing step of the pipeline in the output HDF5 file (as HDF5-groups), together with the configuration associated with each of the processing.
-Input dataset are referenced using external links, which avoids data duplication while keeping traceability. 
+Input data sets are referenced using external links, which avoids data duplication while keeping traceability. 
 Finally, metadata describing the sample, its buffer and the configuration of the beam-line are also recorded using the Nexus convention \cite{nexus}.
 Each processing pipeline defines a default plot which tries to summarize the experimental result to the user.
 
 \subsection{Multi-frame integration pipeline}
 \label{multiframe_pipeline}
-The multi-frame integration pipeline, figure \ref{multiframe_worflow} is triggered with the name of one \textsc{lima}-file (containing several frames) and additional metadata describing the sample and the experiment.
+The multi-frame integration pipeline, figure \ref{multiframe_worflow}, is triggered with the name of one \textsc{lima}-file (containing several frames) and additional metadata describing the sample and the experiment.
 Those additional information are either collected by the sequencer, \textsc{bliss}, like the beam-stop diode intensity, or read from the user interface, BSXCube3, like the sample name and concentration.
 
 \begin{figure}
@@ -299,7 +298,7 @@ This pipeline is built of four subsequent analysis steps, as illustrated in figu
 \begin{enumerate}
 \item Each recorded image is azimuthally integrated with \textit{pyFAI} \cite{pyfai_2020} to produce one scattering curve per frame;
 \item Scattering curves are compared, searching for radiation damage using the \textit{CorMap} algorithm \cite{CorMap}; the probability for each pair of curves to be the same is compared to thresholds to assess their equivalence, those thresholds depend if frames were adjacent or not;
-\item Equivalent images are averaged pixel-wise, weighted by the beam-stop diode intensity; variance is assessed using Poisson law. Since time-averaging and azimuthal-integration are not (strictly) commutative, see appendix \ref{rational}, the processing restarts from the 2D frame and not from individual curves;
+\item Equivalent images are averaged pixel-wise, weighted by the beam-stop diode intensity; variance is assessed assuming a Poisson statistics. Since time-averaging and azimuthal-integration are not commutative, (see appendix \ref{rational}), the processing restarts from 2D frames and not from individual curves;
 \item The averaged frame is finally azimuthally integrated and uncertainties propagated accordingly. 
 \end{enumerate}
 
@@ -342,7 +341,7 @@ The HDF5-file additionally includes external links to the raw frames as acquired
 
 \subsection{Sample-changer pipeline}
 \label{sc-pipeline}
-In sample-changer mode, solution containing samples are acquired alternatively with pure buffer solutions.
+In sample-changer mode, solutions containing samples are acquired alternatively with pure buffer solutions.
 The throughput of the beam-line is then limited by the pipetting system of the robot and the delay for cleaning the exposure chamber.  
 The processing is triggered with integrated data from the sample (i.e. the name of the file containing the sample data after azimuthal integration) and a list of 
 buffer files corresponding to the different acquisition of buffers, usually the buffer before and the buffer after the sample acquisition.
@@ -352,20 +351,21 @@ buffer files corresponding to the different acquisition of buffers, usually the 
    %\includegraphics[width=12cm]{Figure_6.eps}
    \includegraphics[width=12cm]{pipeline_subtract.eps}
    \caption{Schematic of the sample-changer pipline: 
-   1. Comparison of buffer frames image;
-   2. Subtraction of averaged buffer image from sample image;
+   1. Comparison of buffer curves;
+   2. Subtraction of averaged buffer images from sample image;
    3. Azimuthal integration the background subtrated image;
-   4. and subsequent: SAS analysis, including Guinier, Kratky and BIFT analysis.}
+   4. to 7. SAS analysis (contains Guinier fit, Kratky plot and BIFT analysis);
+   8. Registration into ISPyB.}
 \end{figure}
 
 The sample-changer pipeline is schematized in figure \ref{samplechanger_worflow} and produces a new HDF5-file with the subtracted data in it, such file is visualized in figure \ref{subtracted} and contains the results of this 8-stage pipeline: 
 \begin{enumerate}
     \item Comparison of buffer curves using the \textit{CorMap} algorithm \cite{CorMap};
-    \item Buffer frames are averaged together and subtracted from the sample averaged frame (again restarting from 2D data);
+    \item Buffer frames are averaged together and subtracted from the sample averaged frame (restarting from 2D raw frames);
     \item Azimuthal integration of the subtracted frame with \textit{pyFAI} \cite{pyfai_2020};
-    \item Guinier analysis with the associated linear regression of $log(I(q))$ vs. $log(I_0)-1/3 (R_{G}q)^{2}$ at low $q$ as default plot;
-    \item Dimensionless Kratky plot: $(q\cdot R_g)^2\cdot I/I_0$  vs. $q\cdot R_g$;
-    \item Porod \cite{glatter+kratky} and Rambo-Tainer invariant \cite{RamboTainerNature2013} calculation to assess the the molecular volume and molecular mass of the sample;
+    \item Guinier analysis with the associated linear regression of $log(I(q))$ vs. $log(I_0)-\frac{R_{g}\cdot q}{3})^{2}$ at low $q$ as default plot;
+    \item Dimensionless Kratky plot: $(q\cdot R_g)^2\cdot I/I_0$  vs. $q\cdot R_g$ to assess the flexibility of the macro-molecule;
+    \item Porod \cite{glatter+kratky} and Rambo-Tainer invariants \cite{RamboTainerNature2013} calculation to assess the the molecular volume and molecular mass of the sample;
     \item Indirect inverse Fourier transform using the BIFT algorithm \cite{bift} provides the pair distance distribution function $p=f(r)$;
     \item Transfer of reduced data to ISPyB for BioSAXS (compatibility layer with legacy ISPyB).
 \end{enumerate}
@@ -403,7 +403,7 @@ Once again, the subtraction is made on 2D frames and not on integrated curves fo
 % All those information are registered and the default plot is defined to have a display similar to figure \ref{subtracted}
 % with the scattering curve superimposed with the BIFT-fitted scattering curve.
 
-The final stage of this pipeline is to register those results into the ISPyB for BioSAXS database \cite{ISPYBB} (https://exi.esrf.fr), and instantly available to the user via the data portal \cite{data-portal}. 
+The final stage of this pipeline is to register those results into the ISPyB for BioSAXS database \cite{ISPYBB} (https://exi.esrf.fr), and instantly available to the user via the data-portal \cite{data-portal}. 
 Once data are registered into the data-portal (https://data.esrf.fr), they receive a unique DOI which can be referred to when user are publishing results to the \textsc{sasbdb} \cite{sasbdb}.
 The same data are shared with the BsxCuBE3 control software via a \textit{memcached} key-value database for instant feed-back on the user interface.
 
@@ -413,7 +413,7 @@ Online purification of the sample allows to reduce the effect of oligomerization
 It has become a standard procedure since it was introduced to BM29 in 2012 \cite{SECPaper2012} and accounts now for two third of all measurements performed at the beam-line.
 
 In this mode, a typical acquisition consists of one thousand frames saved as ten files containing each one hundred frames.
-The input for this pipeline a list of HDF5-files with partial chromatograms integrated by the \textit{multi-frame pipeline} presented in section \ref{multiframe_pipeline}. 
+The input for this pipeline is a list of HDF5-files with partial chromatograms integrated by the \textit{multi-frame pipeline} presented in section \ref{multiframe_pipeline}. 
 %How large is such ar partial chromatogram? How many are there? How is their size decided?
 The \textsc{hplc} pipeline, figure \ref{hplc_worflow}, re-builds the complete chromatogram and performs the complete analysis of the different fractions, taking into account the possibility for empty sections (due to missing input files).
 This pipeline produces files which are presented in figure \ref{hplc}.
@@ -426,10 +426,11 @@ This pipeline produces files which are presented in figure \ref{hplc}.
     2.\&3. Multivariate analysis;
     4. Background extraction;
     5. Peak finding;
-    6. SAS analysis on each fraction.}
+    6. SAS analysis on each fraction;
+    7. Storage to ISPyB.}
 \end{figure}
 
-This chromatography pipeline has six processing stages:
+This chromatography pipeline has seven processing stages:
 \begin{enumerate}
     \item Concatenate partial chromatograms (1D curves) provided by the \textit{multi-frame} pipeline to obtain the full chromatogram; Empty/missing regions are handled here;
     % TO obtain what? All individual frames? All averages frames?
@@ -438,7 +439,7 @@ This chromatography pipeline has six processing stages:
     \item Perform a non-negative matrix factorisation (NMF) to provide the scattering curve of the different pure components and their associated chromatograms \cite{NMF-SEC_SAXS}; 
     \item Select points belonging to the background by comparing experimental scattering with the first singular-vector from the SVD; average selected curves; %If understand the following correclty, it is simply the first 30 \%? is there are reason this is not dome before SVD and NMF
     \item Perform peak-picking on subtracted curves to define fractions of the chromatogram; 
-    \item Analyse each fraction with a similar pipeline to the one presented in \ref{sc-pipeline}; %Where do those fractions  come from?
+    \item Analyse each fraction with a similar pipeline to the one presented in \ref{sc-pipeline}: Guinier plot, Kratky plot, \textsc{bift} analysis ; %Where do those fractions  come from?
     \item Finally export data and send them to ISPyB for BioSAXS.
 \end{enumerate}
 
@@ -468,7 +469,7 @@ The SVD and NMF algorithms are respectively provided by NumPy \cite{numpy} and s
 Since none of the multivariate analysis propagates uncertainties, all processing needs to be re-done:
 a correlation-map is built between the first singular vector of the SVD and all experimental scattering curves. 
 Those curves are ranked from the most likely to be pure buffer to the least likely. 
-Since the major part of the collected fraction are expected to be buffer, the thirty percent of the curves which are the most similar to the first singular-vector are considered to be buffer and averaged together in stage 4.
+Since the major part of the collected fraction are expected to be buffer, the thirty percent of the curves which are the most similar to the first singular-vector are considered to be buffer and averaged together at stage 4.
 Uncertainties are propagated based on deviations calculated during azimuthal integration (and not on 2D frames, see appendix \ref{rational}).
 %This should not be an issue since normalization factors, which depend mostly on transmitted intensity, vary little between frames.
 
@@ -478,13 +479,13 @@ Uncertainties are propagated based on deviations calculated during azimuthal int
 The fraction collection (stage 5) is performed on the total scattering chromatogram, smoothed by median filtering. 
 A peak search is performed with the \textit{find\_peaks\_cwt} function from the \textit{scipy} library \cite{scipy}.
 It provides a list of region of high intensity scattering: the different fractions of the chromatogam.
-All subtracted curves from the same fraction are averaged and analysed with a similar pipeline as described in section \ref{sc-pipeline}: Guinier analysis, Kratky-plot, various invariant extraction and pair-distribution via BIFT.
+All subtracted curves from the same fraction are averaged and analysed with a similar pipeline as described in section \ref{sc-pipeline}: Guinier fit, Kratky-plot, various invariant extraction and pair-distribution via BIFT.
 The results are presented in the same way as in the sample-changer mode, one HDF5 group per fraction.
 
 \section{Discussions}
 
 \subsection{Statistics}
-The processing described in section \ref{pipeline} is in production since September 2020 and is operating for 20 months at the time of writing.
+The processing described in section \ref{pipeline} is in production since September 2020 and has been operating for 20 months at the time of writing.
 The table \ref{stats} summarizes some figures collected:
 \begin{table}
     \label{stats}
@@ -576,9 +577,9 @@ Intensities are obtained from an arithmetic average of already weighted curves.
 Uncertainties are obtained from a quadratic average of uncertainties propagated during integration. 
 
 This method does not take into account the fact that some curves did have more weight than others during integration.
-To exemplify the issue, let's consider the averaging of two buffer datasets: one with hundred frames and the second only with a single frame.
-Since those buffers are all equivalent, the uncertainties for the first dataset will be ten times smaller ($\sqrt{100}$) than for the second.
-When merging those dataset with this method, the uncertainties of the first dataset are negligible compared to the second and the propagated uncertainties will be 40\% smaller than the second dataset, while in reality it should be $10\times$ smaller, ($\sqrt{101}$) ! 
+To exemplify the issue, let's consider the averaging of two buffer data sets: one with hundred frames and the second only with a single frame.
+Since those buffers are all equivalent, the uncertainties for the first data set will be ten times smaller ($\sqrt{100}$) than for the second.
+When merging those data sets with this method, the uncertainties of the first data set are negligible compared to the second and the propagated uncertainties will be 40\% smaller than the second data set, while in reality it should be $10\times$ smaller, ($\sqrt{101}$) ! 
 
 As a rule of thumbs, the numerical values obtained with this method are correct when all normalisation factors are of similar magnitude.
 
