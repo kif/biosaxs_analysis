@@ -212,8 +212,9 @@ The parallelization model used in \textsc{edna} is based on Python threads and f
 %This implies that for each task to be perfomed, an input file needs to be written before launching the process and the result file needs to be read and parsed after the end of the processing.
 %When processing was doing loops of jobs, most of the time was spent in string manipulation for writing and parsing strings (for example: to compare pair-wise 10 frames it takes 45 process to be launched !)
  
-The \textit{dahu} job-manager was designed for the \textsc{trusaxs} beam-line \cite{id02_2022} with those limitations in mind and additional low latency constrain: some jobs, there, needs to be processed with a dozen of milliseconds. 
-This latency constrain prevented us from using classical batch queuing systems, like \textsc{slurm} \cite{slurm}, despite their efficiency at distributing heavy jobs, because they all exhibit scheduling time (hence latency) of several seconds before starting any processing.
+%The \textit{dahu} job-manager was designed for the \textsc{trusaxs} beam-line \cite{id02_2022} with those limitations in mind and additional low latency constrain: some jobs, there, needs to be processed with a dozen of milliseconds. 
+The \textit{dahu} job-manager was designed for the low latency constraints of the \textsc{trusaxs} beam-line \cite{id02_2022}, where some jobs need to be processed within a dozen of milliseconds.
+Batch queuing systems, like \textsc{slurm} \cite{slurm}, are very efficient at distributing heavy jobs, but none was optimized was optimized for reduced scheduling time (or low latency).
 
 %Text manipulation was simplified by switching from XML to JSON data-structure representation. 
 %This modification alone has proven to speed up \textsc{edna} by a factor 3 !
@@ -225,7 +226,7 @@ Thus the code runs actually in parallel only in sections where the Global Interp
 
 
 \subsubsection{Dahu-job}
-manages the execution of one \textit{dahu-plugins} (see here-after), provides an unique identifier which gives access to the status and output of the processing.
+manages the execution of one \textit{dahu-plugin} (see here-after) and provides an unique identifier which gives access to the status and output of the processing.
 Jobs see their input and output saved onto disk, which allows off-line reprocessing in case of an issue during online data-analysis.
 
 \subsubsection{Dahu-plugins} implement the processing logic of the different pipelines.
@@ -245,7 +246,8 @@ The common part, mainly dealing with azimuthal integration, is integrated into a
 %This would profit from  description of how the data is actually structured in the two acquisition modes. I got completely lost here!
 
 Since the Pilatus3 2M detector is controlled by the \textsc{lima} software \cite{lima}, raw images are now saved in a HDF5 file-format \cite{hdf5} with ten or hundred frames per file (depending on the acquisition mode, figure \ref{lima}).
-HDF5 offers compression, faster data-access, symbolic links to datasets from one file to another ... and is imposed by the ESRF data-policy \cite{data-policy}. 
+HDF5 is not only imposed by the ESRF data policy  \cite{data-policy} but offers numerous benefits such as compression, faster data-access, symbolic links to datasets from one file to another ...
+% HDF5 offers compression, faster data-access, symbolic links to datasets from one file to another ... and is imposed by the ESRF data-policy \cite{data-policy}. 
 This data-structure with several frames per file prevents us from re-using the former \textsc{edna} pipelines which were  all triggered frame by frame.
 
 \begin{figure}
@@ -450,9 +452,9 @@ This chromatography pipeline has six processing stages:
 Multivariate analysis is performed to extract the signal of the macro-molecule from background scattering, and provides a hint on how many components have been separated in the chromatography.
 \citeasnoun{svd_threshold} provides the number of singular values/vectors which are to be saved after the SVD decomposition
 The first singular vector contains mainly background scattering, the following ones contain signal from the separated components and subsequent ones account only for noise.
-Unfortunately, those singular vectors, beyond the first one, do not look like scattering curves since SVD does not enforce the positivity of those extracted singular vectors during the decomposition. 
+Unfortunately, those singular vectors, beyond the first one, do not look like scattering curves since SVD does not enforce the positivity of those extracted singular vectors during the decomposition \cite{NNMF_spectro}. 
 Unlike SVD, the NMF factorisation is neither fast nor unique, but the extracted components are all positive and look like scattering curves of components. 
-Moreover, the chromatogram for each of these components is provides.
+% Moreover, the chromatogram for each of these components is provided.
 The SVD and NMF algorithms are respectively provided by NumPy \cite{numpy} and scikit-learn \cite{sklearn}.
 %This decomposes the chromatogram $I(q)$ as a serie of singular-values representing the chromatogram for every component stored in the associated singular-vector. 
 %There are as many singular values/vectors pairs as time-steps acquired in the experiment but only the few firsts account for actual signal.
