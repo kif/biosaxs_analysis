@@ -252,8 +252,8 @@ This data-structure with several frames per file prevents us from re-using the f
 
 \begin{figure}
      \caption{Layout of a raw image HDF5-file produced by the \textsc{lima} acquisition software and visualized with the \textit{silx} viewer.}
-     \includegraphics[width=12cm]{lima.eps}
-     %\includegraphics[width=12cm]{Figure_1.eps}
+     %\includegraphics[width=12cm]{lima.eps}
+     \includegraphics[width=12cm]{Figure_2.eps}
      \label{lima}
 \end{figure}
 
@@ -262,8 +262,8 @@ The \textit{h5web} library is already used in the beam-line control user interfa
 
 \begin{figure}
      \caption{Default visualization offered by the ESRF data-portal (https://data.esrf.fr) of a stack of frames acquired at the BioSAXS beam-line, using the \textit{h5web} viewer.}
-     \includegraphics[width=12cm]{dataportal.eps}
-     %\includegraphics[width=12cm]{Figure_3.eps}
+     %\includegraphics[width=12cm]{dataportal.eps}
+     \includegraphics[width=12cm]{Figure_3.eps}
      \label{dataportal}
 \end{figure}
 
@@ -289,8 +289,8 @@ Those additional information are either collected by the sequencer, \textsc{blis
      2. comparison of 1d-curves;
      3. equivalent frames are averaged;
      4. azimuthal integration of the averaged image.}
-     \includegraphics[width=12cm]{multiframe_pipeline.eps}
-     %\includegraphics[width=12cm]{Figure_4.eps}
+     %\includegraphics[width=12cm]{multiframe_pipeline.eps}
+     \includegraphics[width=12cm]{Figure_4.eps}
      \end{center}
 \end{figure}
 
@@ -307,8 +307,8 @@ This pipeline is built of four subsequent analysis steps, as illustrated in figu
      \caption{Layout of a HDF5-file obtained from the multi-frame integration pipeline, visualized with the \textit{silx} viewer.
      The HDF5-tree structure (left-hand side) follows the pipeline described in figure \ref{multiframe_worflow}.
      The right-hand side plot is the averaged scattering curve $I=f(q)$ in semi-logarithmic scale of the macro-molecule (BSA) before subtraction of the background signal.}
-     \includegraphics[width=12cm]{multiframe.eps}
-     %\includegraphics[width=12cm]{Figure_5.eps}
+     %\includegraphics[width=12cm]{multiframe.eps}
+     \includegraphics[width=12cm]{Figure_5.eps}
      \label{multiframe}
 \end{figure}
 
@@ -349,8 +349,8 @@ buffer files corresponding to the different acquisition of buffers, usually the 
 
 \begin{figure}
    \label{samplechanger_worflow}
-   %\includegraphics[width=12cm]{Figure_6.eps}
-   \includegraphics[width=12cm]{pipeline_subtract.eps}
+   %\includegraphics[width=12cm]{pipeline_subtract.eps}
+   \includegraphics[width=12cm]{Figure_6.eps}
    \caption{Schematic of the sample-changer pipline: 
    1. Comparison of buffer frames image;
    2. Subtraction of averaged buffer image from sample image;
@@ -374,8 +374,8 @@ The pair distribution function obtained from BIFT (stage 7) allows to calculatio
 
 \begin{figure}
     \label{subtracted}
-    \includegraphics[width=12cm]{subtracted.eps}
-    %\includegraphics[width=12cm]{Figure_7.eps}
+    %\includegraphics[width=12cm]{subtracted.eps}
+    \includegraphics[width=12cm]{Figure_7.eps}
     \caption{Default visualization of the HDF5-file produced by the sample changer pipeline with the \textit{silx} viewer. 
     The superimposed red curve corresponds to the BIFT modeled data.}
 \end{figure}
@@ -419,8 +419,8 @@ The \textsc{hplc} pipeline, figure \ref{hplc_worflow}, re-builds the complete ch
 This pipeline produces files which are presented in figure \ref{hplc}.
 \begin{figure}
     \label{hplc_worflow}
-    \includegraphics[width=12cm]{HPLC_pipeline.eps}
-    %\includegraphics[width=12cm]{Figure_8.eps}
+    %\includegraphics[width=12cm]{HPLC_pipeline.eps}
+    \includegraphics[width=12cm]{Figure_8.eps}
     \caption{Schematic of the \textsc{hplc} pipline: 
     1. Concatenate ;
     2.\&3. Multivariate analysis;
@@ -444,8 +444,8 @@ This chromatography pipeline has six processing stages:
 
 \begin{figure}
     \label{hplc}
-    %\includegraphics[width=12cm]{Figure_9.eps}
-    \includegraphics[width=12cm]{HPLC-h5web.eps}
+    \includegraphics[width=12cm]{Figure_9.eps}
+    %\includegraphics[width=12cm]{HPLC-h5web.eps}
     \caption{Default visualization of the HDF5-file produced by the \textsc{hplc} pipeline with the \textit{h5web} viewer integrated into JupyterLab.}
 \end{figure}
 
