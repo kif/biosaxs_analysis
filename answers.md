@@ -1,6 +1,6 @@
 Dear Co-Editor,
 
-Please find hereafter our answer to the three referees:
+Please find hereafter our answers to the three referees:
 
 # Referee 1
 1. The document was proof-read by Mark Tully, co-author, who is a native English speaker.
@@ -13,7 +13,7 @@ Please find hereafter our answer to the three referees:
 8. The sentence has been dropped
 9. a sentence was added to compare the performances with the previous setup
 10. The full sentence was removed. Just to comment on the reliability: Dahu is running as a single program with threads running algorithms implemented by FreeSAS using Cython. Any memory management error within the Cython part would crash the complete server. Since this does not occur, it proves the ensemble is reliable, unfortunately it does not prove all the math were properly implemented.
-11. TODO
+11. Experimental conditions updated
 # Referee 2
 0. This document is about fully automated pipelines for the reduction of BioSAXS data, it is thus normal there is not user interface. In the future, it is foreseen that the user can reprocess data with slightly different parameters from the ISPyB web-interface, but this is not yet done. An advanced user may rather start playing with FreeSAS because it is ESRF-independent and easy to deploy anywhere, unlike the pipelines which are heavily optimized for the local infrastructure.
 While all structure should end in the SASBDB, the work presented here aims only at providing user with a DOI associated with their data, that they can easily link when uploading to the SASBDB, in a similar way to:
