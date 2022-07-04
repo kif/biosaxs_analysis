@@ -86,7 +86,7 @@ The second phase of the ESRF upgrade program did not only provide a new storage 
 The BioSAXS beamline (located on port BM29) was upgraded with a new wiggler source and a larger detector. 
 All analysis software has been rewritten to cope with the increased data-flux and continue providing beam-line users with reduced and pre-processed data in real-time.
 This article describes \textit{FreeSAS}, an open-source collection of various SAS analysis algorithms needed to reduce and analyze BioSAXS data, and \textit{dahu}, the tool used to interface data-analysis with beam-line control. 
-It further presents the data processing pipelines for the different data acquisitions modes of the beam-line, using either a sample-changer for individual homogeneous, samples or an inline size-exclusion chromatography setup.
+It further presents the data processing pipelines for the different data acquisitions modes of the beam-line, using either a sample-changer for individual homogeneous samples or an inline size-exclusion chromatography setup.
 \end{abstract}
 
 
@@ -98,7 +98,7 @@ It further presents the data processing pipelines for the different data acquisi
 
 \section{Introduction}
 Small angle scattering (SAS) provides information on the shape of macro-molecules on the nanometer scale and is particularly suited for biological samples thanks to a large range of suitable buffer conditions.
-Unlike single crystal diffraction or Nuclear Magnetic Resonance (NMR) which offer atomic resolution, bioSAS provides only information on the envelope of macro-molecules: it allows to validate the relative position of large structures and the assembly of biological complexes \cite{biosaxs_rev2018}. 
+Unlike single crystal diffraction or Nuclear Magnetic Resonance (NMR) which offer atomic resolution, BioSAS provides only information on the envelope of macro-molecules: it allows to validate the relative position of large structures in the assembly of biological complexes \cite{biosaxs_rev2018}. 
 Structural biologists perform SAXS experiments to validate the size and the shape of their protein or complex under study. 
 Since most beam-line users are biologists, they are neither synchrotron, nor SAXS specialists.
 A full analysis of their data is thus of crucial importance to them \cite{shibom}. 
@@ -112,7 +112,7 @@ The new EBS source (Extremely Brilliant Source, \citeasnoun{EBS} of the ESRF not
 The BM29 BioSAXS beam-line has been rebuilt in 2019 and now features a 2-pole wiggler source and a new Pilatus3 2M detector designed to be mounted in vacuum (previously 1M). 
 This has lead to a substantial increase of data-rate; mainly due to the larger detector. 
 
-This paper is divided into two main parts and starts with a presentation of the tools developped for online data analysis of SAXS data \textit{FreeSAS} and \textit{dahu}, the job scheduler.
+This paper is divided into two main parts and starts with a presentation of the tools developed for online data analysis of SAXS data \textit{FreeSAS} and \textit{dahu}, the job scheduler.
 The section 3 presents the three different pipelines used at the beam-line: the common pipeline for the reduction of scattering images, the pipeline used with the sample-changer and the one used with the size exclusion chromatography setup.
 
 \section{Tools}
@@ -141,14 +141,14 @@ The program takes as entry a 3-column \textsc{ascii} file containing $q$, $I$ an
 \begin{figure}
 \label{plot}
 \includegraphics[width=12cm]{Figure_1.eps}
-\caption{Default visualization of bioSAS data using the \texttt{freesas} tool on a 3-column \textsc{ascii}-file with q, I and $\sigma$, here BSA acquired with 12.5 keV photons. 
+\caption{Default visualization of BioSAS data using the \texttt{freesas} tool on a 3-column \textsc{ascii}-file with q, I and $\sigma$, here BSA acquired with 12.5 keV photons. 
 The top-left plot presents the classical $I=f(q)$ plot in semi-logarithmic scale with the Guinier region highlighted in green and IFT-based curve superimposed in red. Those results come from the Guinier analysis (top-right) based on a linear fit of $log(I)=f(q^2)$ and from the pair distribution function ($p=f(r)$) obtained from the BIFT analysis (bottom-right).
 A Dimensionless Kratky plot is presented at the lower-left. 
 }
 \end{figure}
 
 \subsubsection{Guinier-region fitting:}
-The first analysis performed on bioSAS data is to determines the radius of gyration ($R_g$) of the solvated macro-molecule and the forwards scattering intensity, $I_0$ \cite{guinier}.
+The first analysis performed on BioSAS data is to determines the radius of gyration ($R_g$) of the solvated macro-molecule and the forwards scattering intensity, $I_0$ \cite{Guinier1955}.
 Based on the Tailor expansion of the scattering curve at $q=0$, $R_g$ is obtained from the the linear regression of $log(I(q)) = log(I_0)-1/3 (R_{G}q)^{2}$ on the proper q-range, at small angles, called the Guinier region.
 The selection of the Guinier-region is far from being obvious due to the beam-stop shadow, aggregation effects, and its upper limit depends on $R_g$ itself: $q \cdot R_g<1.3$.
 Thus multiple implementation are provided: \texttt{free\_rg}, which derives from the implementation in BioXTAS-RAW \cite{bioxtasraw}; \texttt{free\_guinier}, which searches for a consensus region rather than the best possible Guinier-region; and finally \texttt{free\_gpa}, which performs a Guinier-peak-analysis \cite{gpa}. 
@@ -285,7 +285,7 @@ Those additional information are either collected by the sequencer, \textsc{blis
      \begin{center} 
      \caption{Schematic of the multi-frame integration pipeline: 
      1. azimuthal integration of individual frames; 
-     2. comparison of 1d-curves;
+     2. comparison of 1d-curves (the 9 first frames are equivalent, the 10$^{th}$ is discarded);
      3. equivalent frames are averaged;
      4. azimuthal integration of the averaged image.}
      %\includegraphics[width=12cm]{multiframe_pipeline.eps}
@@ -434,7 +434,7 @@ This chromatography pipeline has seven processing stages:
 \begin{enumerate}
     \item Concatenate partial chromatograms (1D curves) provided by the \textit{multi-frame} pipeline to obtain the full chromatogram; Empty/missing regions are handled here;
     % TO obtain what? All individual frames? All averages frames?
-    \item Perform a Singlar Value Decomposition (SVD) on the chromatogram to assess the number of components and extract scattering from the the background \cite{BioXTAS}; 
+    \item Perform a Singlar Value Decomposition (SVD) on the chromatogram to assess the number of components and extract the scattering from the background \cite{BioXTAS}; 
     %on the completety, non-background corrected chromatogram?
     \item Perform a non-negative matrix factorisation (NMF) to provide the scattering curve of the different pure components and their associated chromatograms \cite{NMF-SEC_SAXS}; 
     \item Select points belonging to the background by comparing experimental scattering with the first singular-vector from the SVD; average selected curves; %If understand the following correclty, it is simply the first 30 \%? is there are reason this is not dome before SVD and NMF
@@ -538,7 +538,7 @@ Future algorithmic work will focus on \textit{ab-initio} shape reconstruction, b
 
 \section{Conclusion}
 
-This document introduces the \textit{FreeSAS} and the \textit{dahu} software packages which are used respectively to analyse bioSAS data and control online data analysis.
+This document introduces the \textit{FreeSAS} and the \textit{dahu} software packages which are used respectively to analyse BioSAS data and control online data analysis.
 Those two packages are used at the BioSAXS beam-line at the European synchrotron, combined with others, to provide complete data-analysis pipelines.
 The three pipelines described in this contribution are used in production since 2020, and provide real-time feed-back of ongoing experiments to the user.
 All metadata, all parameters and all references to the source data are recorded together with the processed data into single HDF5 files which offers 
